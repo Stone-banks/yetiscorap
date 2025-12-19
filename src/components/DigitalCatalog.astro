@@ -1,0 +1,574 @@
+---
+/**
+ * DigitalCatalog.astro
+ * Dergi tarzı dijital ürün kataloğu komponenti
+ * 
+ * Özellikler:
+ * - Çift sayfa spread görünümü (sol koyu, sağ açık)
+ * - Sayfa navigasyonu (ok butonları, sayfa numarası)
+ * - Kategori tab menüsü
+ * - Zoom özelliği
+ * - PDF indirme butonu
+ * - WhatsApp ile soru sor butonu
+ * - Responsive: mobilde tek sayfa
+ */
+
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  lang?: 'tr' | 'en';
+}
+
+const { lang = 'tr' } = Astro.props;
+
+// Tüm ürünleri al
+const allProducts = await getCollection('products', ({ id }) => {
+  return id.startsWith(`${lang}/`);
+});
+
+// Kategorilere göre grupla
+const productsByCategory = allProducts.reduce((acc, product) => {
+  const category = product.data.category;
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(product);
+  return acc;
+}, {} as Record<string, CollectionEntry<'products'>[]>);
+
+// Kategori isimleri
+const categoryNames = {
+  tr: {
+    bebek: 'Bebek Çorapları',
+    cocuk: 'Çocuk Çorapları'
+  },
+  en: {
+    bebek: 'Baby Socks',
+    cocuk: 'Children Socks'
+  }
+};
+
+// Metinler
+const texts = {
+  tr: {
+    title: 'Dijital Ürün Kataloğu',
+    subtitle: 'Profesyonel toptan satış kataloğumuzu inceleyin',
+    allProducts: 'Tüm Ürünler',
+    page: 'Sayfa',
+    of: '/',
+    downloadPdf: 'PDF İndir',
+    zoom: 'Büyüt',
+    askQuestion: 'Bu ürün için soru sor',
+    ageRange: 'Yaş Aralığı',
+    pieces: 'Adet/Paket',
+    features: 'Özellikler',
+    prevPage: 'Önceki Sayfa',
+    nextPage: 'Sonraki Sayfa'
+  },
+  en: {
+    title: 'Digital Product Catalog',
+    subtitle: 'Browse our professional wholesale catalog',
+    allProducts: 'All Products',
+    page: 'Page',
+    of: '/',
+    downloadPdf: 'Download PDF',
+    zoom: 'Zoom',
+    askQuestion: 'Ask about this product',
+    ageRange: 'Age Range',
+    pieces: 'Pcs/Pack',
+    features: 'Features',
+    prevPage: 'Previous Page',
+    nextPage: 'Next Page'
+  }
+};
+
+const t = texts[lang];
+const catNames = categoryNames[lang];
+
+// WhatsApp numarası
+const phoneNumber = '905369205969';
+
+// Tüm kategorileri al
+const categories = Object.keys(productsByCategory);
+---
+
+<section id="dijital-katalog" class="py-12 md:py-16 lg:py-20 bg-slate-100">
+  <div class="container mx-auto px-4">
+    
+    <!-- Başlık -->
+    <div class="text-center mb-8 md:mb-12">
+      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 md:mb-4">
+        {t.title}
+      </h2>
+      <p class="text-slate-600 text-base md:text-lg max-w-2xl mx-auto">
+        {t.subtitle}
+      </p>
+    </div>
+
+    <!-- Katalog Container -->
+    <div class="catalog-container max-w-6xl mx-auto" id="catalogContainer">
+      
+      <!-- Üst Toolbar -->
+      <div class="catalog-toolbar bg-white rounded-t-2xl border border-b-0 border-slate-200 p-3 md:p-4 flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Kategori Tab Menüsü -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 flex-1 min-w-0">
+          <button 
+            class="catalog-tab active px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors"
+            data-category="all"
+          >
+            {t.allProducts}
+          </button>
+          {categories.map((cat) => (
+            <button 
+              class="catalog-tab px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors"
+              data-category={cat}
+            >
+              {catNames[cat as keyof typeof catNames] || cat}
+            </button>
+          ))}
+        </div>
+
+        <!-- Aksiyon Butonları -->
+        <div class="flex items-center gap-2">
+          <!-- Zoom Butonu -->
+          <button 
+            class="zoom-btn p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+            title={t.zoom}
+            id="zoomBtn"
+          >
+            <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </button>
+          
+          <!-- PDF İndir Butonu -->
+          <button 
+            class="pdf-btn flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600 transition-colors text-sm font-medium"
+            id="downloadPdfBtn"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span class="hidden sm:inline">{t.downloadPdf}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Katalog Spread Alanı -->
+      <div class="catalog-book bg-white rounded-b-2xl border border-slate-200 shadow-2xl overflow-hidden">
+        
+        <!-- Sayfa Container -->
+        <div class="catalog-pages" id="catalogPages">
+          
+          {allProducts.map((product, index) => {
+            const { data, slug } = product;
+            const cleanSlug = slug.includes('/') ? slug.split('/').slice(1).join('/') : slug;
+            const whatsappMsg = lang === 'tr' 
+              ? `Merhaba, ${data.sku} kodlu ürün hakkında bilgi almak istiyorum.`
+              : `Hello, I would like information about product ${data.sku}.`;
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMsg)}`;
+            const isEven = index % 2 === 0;
+            
+            return (
+              <div 
+                class={`catalog-spread ${index === 0 ? 'active' : ''}`}
+                data-page={Math.floor(index / 2) + 1}
+                data-category={data.category}
+                data-index={index}
+              >
+                <!-- Çift Sayfa Spread -->
+                <div class="spread-container flex flex-col md:flex-row min-h-[500px] md:min-h-[600px]">
+                  
+                  <!-- Sol Sayfa (Koyu) -->
+                  <div class={`page-left flex-1 p-6 md:p-8 ${isEven ? 'bg-slate-800 text-white' : 'bg-slate-50 text-slate-900'}`}>
+                    
+                    <!-- Ürün Kodu - Büyük -->
+                    <div class="mb-6">
+                      <span class={`text-4xl md:text-5xl lg:text-6xl font-bold ${isEven ? 'text-pink-400' : 'text-pink-500'}`}>
+                        {data.sku}
+                      </span>
+                    </div>
+                    
+                    <!-- Ürün Başlık -->
+                    <h3 class={`text-xl md:text-2xl font-semibold mb-4 ${isEven ? 'text-white' : 'text-slate-900'}`}>
+                      {data.title}
+                    </h3>
+                    
+                    <!-- Açıklama -->
+                    <p class={`text-sm md:text-base leading-relaxed mb-6 ${isEven ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {data.description || (lang === 'tr' 
+                        ? 'Kaliteli malzemeden üretilmiş, bebek ve çocuk sağlığına uygun çorap modeli.' 
+                        : 'High-quality socks suitable for baby and child health.')}
+                    </p>
+                    
+                    <!-- Özellikler -->
+                    <div class="mb-6">
+                      <h4 class={`text-sm font-semibold mb-3 ${isEven ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {t.features}:
+                      </h4>
+                      <ul class="space-y-2">
+                        {data.features.slice(0, 4).map((feature) => (
+                          <li class="flex items-start gap-2 text-sm">
+                            <svg class={`w-4 h-4 mt-0.5 flex-shrink-0 ${isEven ? 'text-pink-400' : 'text-pink-500'}`} fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span class={isEven ? 'text-slate-300' : 'text-slate-600'}>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <!-- Alt Bilgi -->
+                    <div class={`flex flex-wrap gap-4 text-sm pt-4 border-t ${isEven ? 'border-slate-700' : 'border-slate-200'}`}>
+                      <div>
+                        <span class={isEven ? 'text-slate-400' : 'text-slate-500'}>{t.ageRange}:</span>
+                        <span class={`font-medium ml-1 ${isEven ? 'text-white' : 'text-slate-900'}`}>{data.age_group}</span>
+                      </div>
+                      {data.pieces_per_pack && (
+                        <div>
+                          <span class={isEven ? 'text-slate-400' : 'text-slate-500'}>{t.pieces}:</span>
+                          <span class={`font-medium ml-1 ${isEven ? 'text-white' : 'text-slate-900'}`}>{data.pieces_per_pack}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <!-- WhatsApp Butonu -->
+                    <div class="mt-6">
+                      <a
+                        href={whatsappURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors"
+                      >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                        <span>{t.askQuestion}</span>
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <!-- Sağ Sayfa (Açık - Görseller) -->
+                  <div class={`page-right flex-1 p-6 md:p-8 ${isEven ? 'bg-slate-50' : 'bg-slate-800'}`}>
+                    
+                    <!-- Ürün Görselleri Grid -->
+                    <div class="h-full flex flex-col">
+                      
+                      <!-- Ana Görsel -->
+                      <div class="flex-1 mb-4 rounded-xl overflow-hidden bg-white shadow-md">
+                        {data.cover_image ? (
+                          <img 
+                            src={data.cover_image} 
+                            alt={data.title}
+                            class="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div class="w-full h-full min-h-[200px] flex items-center justify-center bg-slate-100">
+                            <svg class="w-16 h-16 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <!-- Alt Görseller Grid (Paketli/Açık gösterim) -->
+                      <div class="grid grid-cols-3 gap-2">
+                        {[1, 2, 3].map((i) => (
+                          <div class="aspect-square rounded-lg overflow-hidden bg-white shadow-sm">
+                            {data.images && data.images[i] ? (
+                              <img 
+                                src={data.images[i]} 
+                                alt={`${data.title} - ${i}`}
+                                class="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div class="w-full h-full flex items-center justify-center bg-slate-100">
+                                <svg class="w-6 h-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <!-- Sayfa Numarası -->
+                      <div class={`mt-4 text-right text-sm ${isEven ? 'text-slate-500' : 'text-slate-400'}`}>
+                        {t.page} {index + 1}
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
+            );
+          })}
+          
+        </div>
+        
+        <!-- Navigasyon -->
+        <div class="catalog-nav flex items-center justify-between p-4 bg-slate-50 border-t border-slate-200">
+          
+          <!-- Önceki Sayfa -->
+          <button 
+            class="nav-btn prev flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            id="prevPageBtn"
+            disabled
+          >
+            <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="hidden sm:inline text-sm font-medium text-slate-600">{t.prevPage}</span>
+          </button>
+          
+          <!-- Sayfa Göstergesi -->
+          <div class="page-indicator flex items-center gap-2">
+            <span class="text-sm text-slate-500">{t.page}</span>
+            <span class="page-current text-lg font-bold text-pink-500" id="currentPage">1</span>
+            <span class="text-sm text-slate-500">{t.of}</span>
+            <span class="page-total text-lg font-bold text-slate-700" id="totalPages">{allProducts.length}</span>
+          </div>
+          
+          <!-- Sonraki Sayfa -->
+          <button 
+            class="nav-btn next flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            id="nextPageBtn"
+          >
+            <span class="hidden sm:inline text-sm font-medium text-slate-600">{t.nextPage}</span>
+            <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<!-- Zoom Modal -->
+<div class="zoom-modal fixed inset-0 z-50 hidden" id="zoomModal">
+  <div class="absolute inset-0 bg-black/80" id="zoomOverlay"></div>
+  <div class="relative z-10 w-full h-full flex items-center justify-center p-4">
+    <button 
+      class="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+      id="closeZoomBtn"
+    >
+      <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div class="zoom-content max-w-5xl w-full max-h-[90vh] overflow-auto bg-white rounded-2xl shadow-2xl" id="zoomContent">
+      <!-- Zoomed content will be cloned here -->
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Katalog Tab Stilleri */
+  .catalog-tab {
+    @apply bg-slate-100 text-slate-600;
+  }
+  
+  .catalog-tab:hover {
+    @apply bg-slate-200;
+  }
+  
+  .catalog-tab.active {
+    @apply bg-pink-500 text-white;
+  }
+  
+  /* Katalog Kitap Gölge Efekti */
+  .catalog-book {
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Sayfa Geçiş Animasyonu */
+  .catalog-spread {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .catalog-spread.active {
+    display: block;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* 3D Kitap Efekti */
+  .spread-container {
+    perspective: 1500px;
+  }
+  
+  .page-left,
+  .page-right {
+    transition: transform 0.3s ease;
+  }
+  
+  /* Hover efekti */
+  .spread-container:hover .page-left {
+    transform: rotateY(2deg);
+  }
+  
+  .spread-container:hover .page-right {
+    transform: rotateY(-2deg);
+  }
+  
+  /* Mobilde tek sayfa */
+  @media (max-width: 768px) {
+    .spread-container {
+      flex-direction: column;
+    }
+    
+    .page-left,
+    .page-right {
+      min-height: auto;
+    }
+    
+    .spread-container:hover .page-left,
+    .spread-container:hover .page-right {
+      transform: none;
+    }
+  }
+  
+  /* Zoom Modal */
+  .zoom-modal.active {
+    display: block;
+  }
+</style>
+
+<script>
+  // Katalog JavaScript
+  document.addEventListener('DOMContentLoaded', () => {
+    const spreads = document.querySelectorAll('.catalog-spread');
+    const tabs = document.querySelectorAll('.catalog-tab');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const currentPageEl = document.getElementById('currentPage');
+    const totalPagesEl = document.getElementById('totalPages');
+    const zoomBtn = document.getElementById('zoomBtn');
+    const zoomModal = document.getElementById('zoomModal');
+    const zoomOverlay = document.getElementById('zoomOverlay');
+    const closeZoomBtn = document.getElementById('closeZoomBtn');
+    const zoomContent = document.getElementById('zoomContent');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    
+    let currentPage = 0;
+    let filteredSpreads = Array.from(spreads);
+    
+    // Sayfa güncelle
+    function updatePage() {
+      filteredSpreads.forEach((spread, index) => {
+        spread.classList.toggle('active', index === currentPage);
+      });
+      
+      if (currentPageEl) currentPageEl.textContent = String(currentPage + 1);
+      if (totalPagesEl) totalPagesEl.textContent = String(filteredSpreads.length);
+      
+      if (prevBtn) prevBtn.disabled = currentPage === 0;
+      if (nextBtn) nextBtn.disabled = currentPage >= filteredSpreads.length - 1;
+    }
+    
+    // Önceki sayfa
+    prevBtn?.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        updatePage();
+      }
+    });
+    
+    // Sonraki sayfa
+    nextBtn?.addEventListener('click', () => {
+      if (currentPage < filteredSpreads.length - 1) {
+        currentPage++;
+        updatePage();
+      }
+    });
+    
+    // Klavye navigasyonu
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' && currentPage > 0) {
+        currentPage--;
+        updatePage();
+      } else if (e.key === 'ArrowRight' && currentPage < filteredSpreads.length - 1) {
+        currentPage++;
+        updatePage();
+      }
+    });
+    
+    // Kategori filtreleme
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const category = tab.getAttribute('data-category');
+        
+        if (category === 'all') {
+          filteredSpreads = Array.from(spreads);
+        } else {
+          filteredSpreads = Array.from(spreads).filter(
+            spread => spread.getAttribute('data-category') === category
+          );
+        }
+        
+        currentPage = 0;
+        
+        // Tüm spreadleri gizle
+        spreads.forEach(s => s.classList.remove('active'));
+        
+        // Filtrelenmiş ilk spreadi göster
+        if (filteredSpreads.length > 0) {
+          updatePage();
+        }
+      });
+    });
+    
+    // Zoom
+    zoomBtn?.addEventListener('click', () => {
+      const activeSpread = document.querySelector('.catalog-spread.active');
+      if (activeSpread && zoomContent) {
+        zoomContent.innerHTML = activeSpread.innerHTML;
+        zoomModal?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+    
+    // Zoom kapat
+    function closeZoom() {
+      zoomModal?.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    closeZoomBtn?.addEventListener('click', closeZoom);
+    zoomOverlay?.addEventListener('click', closeZoom);
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeZoom();
+    });
+    
+    // PDF İndir (basit alert - gerçek uygulamada PDF generation library kullanılır)
+    downloadPdfBtn?.addEventListener('click', () => {
+      alert('PDF indirme özelliği yakında aktif olacak. Şimdilik sayfayı yazdır (Ctrl+P) ile PDF olarak kaydedebilirsiniz.');
+    });
+    
+    // İlk yükleme
+    updatePage();
+  });
+</script>
