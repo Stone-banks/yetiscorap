@@ -1,0 +1,339 @@
+---
+/**
+ * TR Ürün Katalog Sayfası
+ * Sayfalama (pagination) ile tüm ürünleri listeler
+ *
+ * Özellikler:
+ * - Arama: başlık / SKU / özellikler
+ * - Kategori filtresi: bebek / çocuk
+ * - Görünüm: grid (varsayılan) / liste
+ * - Sayfalama: her sayfada 12 ürün
+ */
+
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import ProductCard from '@components/ProductCard.astro';
+import WhatsAppButton from '@components/WhatsAppButton.astro';
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const allProducts = await getCollection('products', ({ id }) => id.startsWith('tr/'));
+
+  const sortedProducts = allProducts.sort((a, b) => {
+    const dateA = a.data.publishDate?.getTime() || 0;
+    const dateB = b.data.publishDate?.getTime() || 0;
+    return dateB - dateA;
+  });
+
+  return paginate(sortedProducts, { pageSize: 12 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const countAll = page.data.length;
+const countBebek = page.data.filter((p) => p.data.category === 'bebek').length;
+const countCocuk = page.data.filter((p) => p.data.category === 'cocuk').length;
+---
+
+<BaseLayout
+  title="Ürünlerimiz"
+  description="Yetiş Çorap bebek ve çocuk çorabı ürün kataloğu. Toptan satış için kaliteli, uygun fiyatlı çorap çeşitleri."
+  lang="tr"
+>
+  <Header lang="tr" currentPath="/urunler" />
+
+  <main>
+    <!-- Başlık -->
+    <section class="bg-slate-50 py-8 sm:py-10">
+      <div class="container">
+        <div class="max-w-3xl">
+          <h1 class="heading-xl mb-3">Ürünlerimiz</h1>
+          <p class="text-base sm:text-lg text-slate-600">
+            Bebek ve çocuk çoraplarımızı inceleyin. Toptan fiyat teklifi için WhatsApp’tan bizimle iletişime geçin.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Katalog -->
+    <section class="section-sm">
+      <div class="container">
+        <!-- Toolbar -->
+        <div class="mb-6 sm:mb-8 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div class="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto] lg:items-end">
+              <div class="sm:col-span-2 lg:col-span-1">
+                <label for="catalog-search" class="label">Ara</label>
+                <div class="relative">
+                  <svg
+                    class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-4.35-4.35m1.85-5.65a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"
+                    />
+                  </svg>
+                  <input
+                    id="catalog-search"
+                    type="search"
+                    class="input pl-10"
+                    placeholder="Ürün adı, SKU veya özellik..."
+                    autocomplete="off"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="catalog-category" class="label">Kategori</label>
+                <select id="catalog-category" class="input">
+                  <option value="all">Tümü ({countAll})</option>
+                  <option value="bebek">Bebek ({countBebek})</option>
+                  <option value="cocuk">Çocuk ({countCocuk})</option>
+                </select>
+              </div>
+
+              <div class="flex items-end">
+                <button id="catalog-clear" type="button" class="btn btn-ghost btn-sm w-full">
+                  Filtreleri temizle
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+              <p id="catalog-count" class="text-sm text-slate-600" aria-live="polite"></p>
+
+              <div class="inline-flex items-center rounded-xl bg-slate-100 p-1" role="group" aria-label="Görünüm seçimi">
+                <button
+                  id="view-grid"
+                  type="button"
+                  data-view="grid"
+                  class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-white hover:shadow-sm"
+                  aria-pressed="true"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" />
+                  </svg>
+                  Grid
+                </button>
+                <button
+                  id="view-list"
+                  type="button"
+                  data-view="list"
+                  class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-white hover:shadow-sm"
+                  aria-pressed="false"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+                  </svg>
+                  Liste
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid / List -->
+        <div
+          id="product-grid"
+          data-view="grid"
+          class="group/view grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-3 sm:gap-4 lg:gap-6 mb-10 data-[view=list]:grid-cols-1 data-[view=list]:gap-3"
+        >
+          {page.data.map((product) => (
+            <div
+              class="product-item self-start"
+              data-category={product.data.category}
+              data-search={`${product.data.title} ${product.data.sku} ${product.data.features.join(' ')}`.toLowerCase()}
+            >
+              <ProductCard product={product} lang="tr" showQuoteCta />
+            </div>
+          ))}
+        </div>
+
+        <!-- Pagination -->
+        {(page.lastPage > 1) && (
+          <nav aria-label="Sayfa navigasyonu" class="flex justify-center">
+            <ul class="flex flex-wrap items-center justify-center gap-2">
+              {page.url.prev && (
+                <li>
+                  <a
+                    href={page.url.prev}
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 text-slate-700 hover:bg-brand-blue hover:text-white transition-colors"
+                    aria-label="Önceki sayfa"
+                  >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </a>
+                </li>
+              )}
+
+              {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((num) => (
+                <li>
+                  {num === page.currentPage ? (
+                    <span
+                      class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-brand-pink text-white font-medium"
+                      aria-current="page"
+                    >
+                      {num}
+                    </span>
+                  ) : (
+                    <a
+                      href={num === 1 ? '/urunler' : `/urunler/${num}`}
+                      class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 text-slate-700 hover:bg-brand-blue hover:text-white transition-colors font-medium"
+                    >
+                      {num}
+                    </a>
+                  )}
+                </li>
+              ))}
+
+              {page.url.next && (
+                <li>
+                  <a
+                    href={page.url.next}
+                    class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 text-slate-700 hover:bg-brand-blue hover:text-white transition-colors"
+                    aria-label="Sonraki sayfa"
+                  >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+        )}
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+          <p class="text-slate-600 text-lg">Aramanızla eşleşen ürün bulunamadı.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer lang="tr" />
+
+  <WhatsAppButton message="Merhaba, ürünleriniz hakkında toptan fiyat bilgisi almak istiyorum." variant="fab" />
+</BaseLayout>
+
+<script>
+  const grid = document.getElementById('product-grid') as HTMLDivElement | null;
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.product-item'));
+  const emptyState = document.getElementById('empty-state') as HTMLElement | null;
+
+  const searchInput = document.getElementById('catalog-search') as HTMLInputElement | null;
+  const categorySelect = document.getElementById('catalog-category') as HTMLSelectElement | null;
+  const clearButton = document.getElementById('catalog-clear') as HTMLButtonElement | null;
+  const countEl = document.getElementById('catalog-count') as HTMLElement | null;
+
+  const viewGridBtn = document.getElementById('view-grid') as HTMLButtonElement | null;
+  const viewListBtn = document.getElementById('view-list') as HTMLButtonElement | null;
+
+  const storageKey = 'catalogView:tr';
+
+  const state: { q: string; category: 'all' | 'bebek' | 'cocuk'; view: 'grid' | 'list' } = {
+    q: '',
+    category: 'all',
+    view: 'grid'
+  };
+
+  function setView(view: 'grid' | 'list') {
+    state.view = view;
+    if (grid) grid.dataset.view = view;
+
+    const isGrid = view === 'grid';
+    if (viewGridBtn) {
+      viewGridBtn.setAttribute('aria-pressed', String(isGrid));
+      viewGridBtn.classList.toggle('bg-white', isGrid);
+      viewGridBtn.classList.toggle('shadow-sm', isGrid);
+    }
+    if (viewListBtn) {
+      viewListBtn.setAttribute('aria-pressed', String(!isGrid));
+      viewListBtn.classList.toggle('bg-white', !isGrid);
+      viewListBtn.classList.toggle('shadow-sm', !isGrid);
+    }
+
+    try {
+      localStorage.setItem(storageKey, view);
+    } catch {}
+  }
+
+  function updateCount(visible: number) {
+    if (!countEl) return;
+    countEl.textContent = `${visible} ürün`;
+  }
+
+  function updateClearButton() {
+    const active = state.q.length > 0 || state.category !== 'all';
+    if (!clearButton) return;
+    clearButton.disabled = !active;
+    clearButton.classList.toggle('opacity-50', !active);
+    clearButton.classList.toggle('pointer-events-none', !active);
+  }
+
+  function applyFilters() {
+    const q = state.q.trim().toLowerCase();
+    let visible = 0;
+
+    items.forEach((item) => {
+      const category = item.dataset.category || '';
+      const haystack = item.dataset.search || '';
+      const matchesCategory = state.category === 'all' || category === state.category;
+      const matchesSearch = q.length === 0 || haystack.includes(q);
+      const show = matchesCategory && matchesSearch;
+      item.classList.toggle('hidden', !show);
+      if (show) visible += 1;
+    });
+
+    if (emptyState) emptyState.classList.toggle('hidden', visible !== 0);
+    updateCount(visible);
+    updateClearButton();
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      state.q = searchInput.value || '';
+      applyFilters();
+    });
+  }
+
+  if (categorySelect) {
+    categorySelect.addEventListener('change', () => {
+      const value = categorySelect.value;
+      state.category = value === 'bebek' || value === 'cocuk' || value === 'all' ? value : 'all';
+      applyFilters();
+    });
+  }
+
+  if (clearButton) {
+    clearButton.addEventListener('click', () => {
+      state.q = '';
+      state.category = 'all';
+      if (searchInput) searchInput.value = '';
+      if (categorySelect) categorySelect.value = 'all';
+      applyFilters();
+    });
+  }
+
+  if (viewGridBtn) viewGridBtn.addEventListener('click', () => setView('grid'));
+  if (viewListBtn) viewListBtn.addEventListener('click', () => setView('list'));
+
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (saved === 'list' || saved === 'grid') setView(saved);
+  } catch {}
+
+  setView(state.view);
+  applyFilters();
+</script>

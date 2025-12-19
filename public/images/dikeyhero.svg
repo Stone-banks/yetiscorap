@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200">
+  <!-- Dikey Hero - Mobil için dekoratif arka plan -->
+  <defs>
+    <!-- Ana gradient -->
+    <linearGradient id="bgGradMobile" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fdf2f8;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#f0f9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fefce8;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Çorap gradient'leri -->
+    <linearGradient id="pinkSockM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f9a8d4" />
+      <stop offset="100%" style="stop-color:#ec4899" />
+    </linearGradient>
+    <linearGradient id="blueSockM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#93c5fd" />
+      <stop offset="100%" style="stop-color:#3b82f6" />
+    </linearGradient>
+    <linearGradient id="yellowSockM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fde047" />
+      <stop offset="100%" style="stop-color:#eab308" />
+    </linearGradient>
+    <linearGradient id="greenSockM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#86efac" />
+      <stop offset="100%" style="stop-color:#22c55e" />
+    </linearGradient>
+    <linearGradient id="purpleSockM" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4b5fd" />
+      <stop offset="100%" style="stop-color:#8b5cf6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Arka plan -->
+  <rect width="800" height="1200" fill="url(#bgGradMobile)"/>
+
+  <!-- Dekoratif daireler -->
+  <circle cx="0" cy="100" r="200" fill="#fce7f3" opacity="0.5"/>
+  <circle cx="800" cy="300" r="250" fill="#dbeafe" opacity="0.4"/>
+  <circle cx="400" cy="600" r="350" fill="#fef9c3" opacity="0.25"/>
+  <circle cx="100" cy="1100" r="200" fill="#dcfce7" opacity="0.4"/>
+  <circle cx="700" cy="1000" r="180" fill="#ede9fe" opacity="0.4"/>
+
+  <!-- Üst sol çoraplar -->
+  <g transform="translate(60, 80) rotate(-20)">
+    <path d="M0,0 L55,0 L55,160 Q55,195 37,218 L28,230 Q14,245 0,245 Q-14,245 -28,230 L-37,218 Q-55,195 -55,160 L-55,0 L0,0" fill="url(#pinkSockM)" opacity="0.7"/>
+    <ellipse cx="0" cy="0" rx="27" ry="9" fill="#fce7f3"/>
+    <circle cx="-18" cy="70" r="10" fill="white" opacity="0.6"/>
+    <circle cx="18" cy="70" r="10" fill="white" opacity="0.6"/>
+    <circle cx="0" cy="105" r="10" fill="white" opacity="0.6"/>
+  </g>
+
+  <g transform="translate(180, 220) rotate(15)">
+    <path d="M0,0 L40,0 L40,120 Q40,148 27,165 L20,176 Q10,188 0,188 Q-10,188 -20,176 L-27,165 Q-40,148 -40,120 L-40,0 L0,0" fill="url(#blueSockM)" opacity="0.5"/>
+    <ellipse cx="0" cy="0" rx="20" ry="6" fill="#dbeafe"/>
+    <rect x="-25" y="35" width="50" height="6" fill="white" opacity="0.5"/>
+    <rect x="-25" y="50" width="50" height="6" fill="white" opacity="0.5"/>
+  </g>
+
+  <!-- Üst sağ çoraplar -->
+  <g transform="translate(700, 100) rotate(25)">
+    <path d="M0,0 L50,0 L50,150 Q50,183 33,205 L25,217 Q12,232 0,232 Q-12,232 -25,217 L-33,205 Q-50,183 -50,150 L-50,0 L0,0" fill="url(#yellowSockM)" opacity="0.65"/>
+    <ellipse cx="0" cy="0" rx="25" ry="8" fill="#fef9c3"/>
+    <path d="M-32,45 L32,45 L32,70 L-32,70 Z" fill="white" opacity="0.4"/>
+    <circle cx="-12" cy="100" r="8" fill="white" opacity="0.5"/>
+    <circle cx="12" cy="100" r="8" fill="white" opacity="0.5"/>
+  </g>
+
+  <g transform="translate(620, 280) rotate(-10)">
+    <path d="M0,0 L35,0 L35,105 Q35,130 23,145 L18,154 Q9,165 0,165 Q-9,165 -18,154 L-23,145 Q-35,130 -35,105 L-35,0 L0,0" fill="url(#greenSockM)" opacity="0.5"/>
+    <ellipse cx="0" cy="0" rx="17" ry="5" fill="#dcfce7"/>
+    <circle cx="0" cy="50" r="15" fill="white" opacity="0.4"/>
+  </g>
+
+  <!-- Alt sol çoraplar -->
+  <g transform="translate(80, 950) rotate(-10)">
+    <path d="M0,0 L45,0 L45,135 Q45,165 30,185 L22,196 Q11,210 0,210 Q-11,210 -22,196 L-30,185 Q-45,165 -45,135 L-45,0 L0,0" fill="url(#purpleSockM)" opacity="0.6"/>
+    <ellipse cx="0" cy="0" rx="22" ry="7" fill="#ede9fe"/>
+    <path d="M-28,30 Q0,48 28,30" stroke="white" stroke-width="5" fill="none" opacity="0.5"/>
+    <path d="M-28,48 Q0,66 28,48" stroke="white" stroke-width="5" fill="none" opacity="0.5"/>
+  </g>
+
+  <g transform="translate(200, 1080) rotate(20)">
+    <path d="M0,0 L38,0 L38,115 Q38,142 25,158 L19,168 Q9,180 0,180 Q-9,180 -19,168 L-25,158 Q-38,142 -38,115 L-38,0 L0,0" fill="url(#blueSockM)" opacity="0.5"/>
+    <ellipse cx="0" cy="0" rx="19" ry="6" fill="#dbeafe"/>
+    <circle cx="-10" cy="55" r="8" fill="white" opacity="0.5"/>
+    <circle cx="10" cy="55" r="8" fill="white" opacity="0.5"/>
+  </g>
+
+  <!-- Alt sağ çoraplar -->
+  <g transform="translate(680, 920) rotate(15)">
+    <path d="M0,0 L48,0 L48,145 Q48,178 32,198 L24,210 Q12,224 0,224 Q-12,224 -24,210 L-32,198 Q-48,178 -48,145 L-48,0 L0,0" fill="url(#pinkSockM)" opacity="0.6"/>
+    <ellipse cx="0" cy="0" rx="24" ry="8" fill="#fce7f3"/>
+    <circle cx="-15" cy="65" r="10" fill="white" opacity="0.5"/>
+    <circle cx="15" cy="65" r="10" fill="white" opacity="0.5"/>
+    <circle cx="0" cy="100" r="10" fill="white" opacity="0.5"/>
+  </g>
+
+  <g transform="translate(580, 1100) rotate(-15)">
+    <path d="M0,0 L35,0 L35,105 Q35,130 23,145 L18,154 Q9,165 0,165 Q-9,165 -18,154 L-23,145 Q-35,130 -35,105 L-35,0 L0,0" fill="url(#yellowSockM)" opacity="0.45"/>
+    <ellipse cx="0" cy="0" rx="17" ry="5" fill="#fef9c3"/>
+    <rect x="-22" y="30" width="44" height="5" fill="white" opacity="0.4"/>
+    <rect x="-22" y="42" width="44" height="5" fill="white" opacity="0.4"/>
+  </g>
+
+  <!-- Orta dekoratif çoraplar (küçük, arka planda) -->
+  <g transform="translate(350, 400) rotate(-5) scale(0.7)">
+    <path d="M0,0 L40,0 L40,120 Q40,148 27,165 L20,176 Q10,188 0,188 Q-10,188 -20,176 L-27,165 Q-40,148 -40,120 L-40,0 L0,0" fill="url(#greenSockM)" opacity="0.3"/>
+  </g>
+
+  <g transform="translate(500, 750) rotate(10) scale(0.6)">
+    <path d="M0,0 L40,0 L40,120 Q40,148 27,165 L20,176 Q10,188 0,188 Q-10,188 -20,176 L-27,165 Q-40,148 -40,120 L-40,0 L0,0" fill="url(#purpleSockM)" opacity="0.3"/>
+  </g>
+
+  <!-- Yıldız/parıltı efektleri -->
+  <g fill="#fbbf24" opacity="0.6">
+    <circle cx="300" cy="150" r="4"/>
+    <circle cx="550" cy="200" r="3"/>
+    <circle cx="150" cy="400" r="4"/>
+    <circle cx="650" cy="500" r="3"/>
+    <circle cx="250" cy="700" r="5"/>
+    <circle cx="500" cy="850" r="4"/>
+    <circle cx="350" cy="1050" r="3"/>
+    <circle cx="700" cy="1150" r="4"/>
+  </g>
+</svg>

@@ -1,0 +1,79 @@
+---
+/**
+ * EN 404 Page Not Found
+ */
+
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+---
+
+<BaseLayout
+  title="Page Not Found - 404"
+  description="The page you are looking for could not be found."
+  lang="en"
+>
+  <Header lang="en" />
+
+  <main>
+    <section class="section min-h-[60vh] flex items-center justify-center">
+      <div class="container">
+        <div class="max-w-2xl mx-auto text-center">
+          <!-- 404 Illustration -->
+          <div class="mb-8">
+            <svg class="w-48 h-48 mx-auto text-brand-pink/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+
+          <!-- Title -->
+          <h1 class="heading-xl mb-4">
+            <span class="text-brand-pink">404</span>
+            <br />
+            Page Not Found
+          </h1>
+
+          <!-- Description -->
+          <p class="text-lg text-slate-600 mb-8">
+            Sorry, the page you are looking for does not exist or may have been moved.
+            You can use the links below to return to the homepage or browse our products.
+          </p>
+
+          <!-- Buttons -->
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/en" class="btn btn-primary px-8 py-3">
+              Back to Home
+            </a>
+            <a href="/en/products" class="btn btn-outline px-8 py-3">
+              Browse Products
+            </a>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="mt-12 pt-8 border-t border-slate-200">
+            <p class="text-sm text-slate-500 mb-4">Quick Links:</p>
+            <ul class="flex flex-wrap justify-center gap-4 text-sm">
+              <li>
+                <a href="/en" class="text-brand-blue hover:text-brand-pink transition-colors">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="/en/products" class="text-brand-blue hover:text-brand-pink transition-colors">
+                  Products
+                </a>
+              </li>
+              <li>
+                <a href="/en/contact" class="text-brand-blue hover:text-brand-pink transition-colors">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer lang="en" />
+</BaseLayout>

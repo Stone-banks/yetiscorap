@@ -1,0 +1,67 @@
+{
+  "$ref": "#/definitions/products",
+  "definitions": {
+    "products": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "sku": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "bebek",
+            "cocuk"
+          ]
+        },
+        "age_group": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cover_image": {
+          "type": "string"
+        },
+        "whatsapp_msg": {
+          "type": "string"
+        },
+        "publishDate": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "integer",
+              "format": "unix-time"
+            }
+          ]
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "sku",
+        "category",
+        "age_group",
+        "features",
+        "cover_image"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

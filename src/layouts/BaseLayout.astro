@@ -1,0 +1,126 @@
+---
+/**
+ * BaseLayout.astro
+ * Ana layout bileşeni - Tüm sayfalar bu layout'u kullanır
+ * SEO, meta tags, JSON-LD yapısal veri içerir
+ */
+
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: 'tr' | 'en';
+  image?: string;
+  type?: 'website' | 'article';
+  canonicalURL?: string;
+  alternateURL?: string;
+  alternateLang?: 'tr' | 'en';
+  jsonLd?: object;
+}
+
+const {
+  title,
+  description,
+  lang = 'tr',
+  image = '/images/placeholder.png',
+  type = 'website',
+  canonicalURL,
+  alternateURL,
+  alternateLang,
+  jsonLd
+} = Astro.props;
+
+// Site bilgileri
+const siteTitle = 'Yetiş Çorap - Toptan Çocuk ve Bebek Çorabı';
+const siteTitleEN = 'Yetiş Çorap - Wholesale Children and Baby Socks';
+const siteURL = 'https://yetiscorap.com';
+
+// Tam title (sayfa title + site title)
+const fullTitle = title ? `${title} | ${lang === 'tr' ? siteTitle : siteTitleEN}` : (lang === 'tr' ? siteTitle : siteTitleEN);
+
+// Canonical URL oluşturma
+const currentPath = Astro.url.pathname;
+const canonical = canonicalURL || `${siteURL}${currentPath}`;
+
+// Alternate URL (dil değiştirici için)
+const alternate = alternateURL || (lang === 'tr' ? `${siteURL}/en${currentPath}` : `${siteURL}${currentPath.replace('/en', '')}`);
+const alternateLangValue = alternateLang || (lang === 'tr' ? 'en' : 'tr');
+
+// OpenGraph görseli
+const ogImage = image.startsWith('http') ? image : `${siteURL}${image}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- SEO Meta Tags -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Alternate Language (hreflang) -->
+    <link rel="alternate" hreflang={lang} href={canonical} />
+    <link rel="alternate" hreflang={alternateLangValue} href={alternate} />
+    <link rel="alternate" hreflang="x-default" href={`${siteURL}/`} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={lang === 'tr' ? 'tr_TR' : 'en_US'} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonical} />
+    <meta property="twitter:title" content={fullTitle} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={ogImage} />
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+
+    <!-- Mobile Web App -->
+    <meta name="theme-color" content="#F472B6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Preconnect (Performans için) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- JSON-LD Yapısal Veri -->
+    {jsonLd && (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
+
+    <!-- Critical CSS (Inline edilebilir) -->
+    <style>
+      /* Critical CSS - İlk render için */
+      body {
+        opacity: 0;
+        animation: fadeIn 0.3s ease-in forwards;
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Ana içerik slot -->
+    <slot />
+
+    <!-- Analytics (gerekirse eklenebilir) -->
+    <!-- Google Analytics, Meta Pixel vb. buraya eklenebilir -->
+  </body>
+</html>

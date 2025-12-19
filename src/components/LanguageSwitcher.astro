@@ -1,0 +1,130 @@
+---
+/**
+ * LanguageSwitcher.astro
+ * Dil değiştirici bileşeni (TR/EN)
+ *
+ * Özellikler:
+ * - Mevcut sayfanın EN/TR karşılığına yönlendirir
+ * - Ürün detay ve liste sayfalarında slug eşleşmesi
+ * - Bayrak ikonları ile görsel tasarım
+ *
+ * Props:
+ * - currentLang: Mevcut dil ('tr' | 'en')
+ * - currentPath: Mevcut sayfa yolu
+ */
+
+interface Props {
+  currentLang: 'tr' | 'en';
+  currentPath?: string;
+}
+
+const { currentLang, currentPath = '' } = Astro.props;
+
+/**
+ * Dil değiştirme URL'sini oluştur
+ * - TR'den EN'e: başına /en ekle
+ * - EN'den TR'ye: /en'i kaldır
+ */
+function getAlternateURL(path: string, fromLang: 'tr' | 'en'): string {
+  if (fromLang === 'tr') {
+    // TR -> EN: /en prefix ekle
+    return `/en${path}`;
+  } else {
+    // EN -> TR: /en prefix'ini kaldır
+    return path.replace(/^\/en/, '') || '/';
+  }
+}
+
+// Sayfa yolunu al
+const pagePath = currentPath || Astro.url.pathname;
+
+// Alternatif dil URL'si
+const alternateURL = getAlternateURL(pagePath, currentLang);
+
+// Diğer dil
+const otherLang = currentLang === 'tr' ? 'en' : 'tr';
+const otherLangLabel = currentLang === 'tr' ? 'English' : 'Türkçe';
+---
+
+<div class="language-switcher flex items-center gap-2">
+  <!-- Mevcut Dil (Aktif) -->
+  <span
+    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-900 bg-slate-100 rounded-md"
+    aria-current="page"
+  >
+    {currentLang === 'tr' ? (
+      <>
+        <!-- Türk Bayrağı SVG -->
+        <svg class="w-5 h-4" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+          <rect width="900" height="600" fill="#E30A17"/>
+          <circle cx="425" cy="300" r="150" fill="#fff"/>
+          <circle cx="475" cy="300" r="120" fill="#E30A17"/>
+          <polygon points="583.4,300 530.4,334.6 545.4,273.5 508.4,234.6 570.4,234.6 583.4,173.5 596.4,234.6 658.4,234.6 621.4,273.5 636.4,334.6" fill="#fff"/>
+        </svg>
+        <span>TR</span>
+      </>
+    ) : (
+      <>
+        <!-- İngiliz Bayrağı SVG -->
+        <svg class="w-5 h-4" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+          <clipPath id="s"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+          <clipPath id="t"><path d="M30,15 h30 v15 z v-30 h-30 z h-30 v15 z v-15 h30 z"/></clipPath>
+          <g clip-path="url(#s)">
+            <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+            <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+            <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t)" stroke="#C8102E" stroke-width="4"/>
+            <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+            <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+          </g>
+        </svg>
+        <span>EN</span>
+      </>
+    )}
+  </span>
+
+  <!-- Ayırıcı -->
+  <span class="text-slate-300">|</span>
+
+  <!-- Diğer Dil (Link) -->
+  <a
+    href={alternateURL}
+    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-colors duration-200"
+    hreflang={otherLang}
+    aria-label={`Switch to ${otherLangLabel}`}
+  >
+    {otherLang === 'tr' ? (
+      <>
+        <!-- Türk Bayrağı SVG -->
+        <svg class="w-5 h-4" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+          <rect width="900" height="600" fill="#E30A17"/>
+          <circle cx="425" cy="300" r="150" fill="#fff"/>
+          <circle cx="475" cy="300" r="120" fill="#E30A17"/>
+          <polygon points="583.4,300 530.4,334.6 545.4,273.5 508.4,234.6 570.4,234.6 583.4,173.5 596.4,234.6 658.4,234.6 621.4,273.5 636.4,334.6" fill="#fff"/>
+        </svg>
+        <span>TR</span>
+      </>
+    ) : (
+      <>
+        <!-- İngiliz Bayrağı SVG -->
+        <svg class="w-5 h-4" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+          <clipPath id="s2"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+          <clipPath id="t2"><path d="M30,15 h30 v15 z v-30 h-30 z h-30 v15 z v-15 h30 z"/></clipPath>
+          <g clip-path="url(#s2)">
+            <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+            <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+            <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#t2)" stroke="#C8102E" stroke-width="4"/>
+            <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+            <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/>
+          </g>
+        </svg>
+        <span>EN</span>
+      </>
+    )}
+  </a>
+</div>
+
+<style>
+  .language-switcher {
+    user-select: none;
+  }
+</style>
