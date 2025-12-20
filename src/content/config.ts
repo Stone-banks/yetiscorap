@@ -54,7 +54,25 @@ const productsCollection = defineCollection({
      * 1. public/images/products/ klasörüne görselleri yükle
      * 2. Bu alanı güncelle: cover_image: "/images/products/kod-14-bebek.jpg"
      */
-    cover_image: z.string(),
+    cover_image: z.string().default('/images/placeholder.png'),
+
+    /**
+     * Ek ürün görselleri (opsiyonel - carousel için)
+     * Örnek: ["/images/products/kod-14-1.jpg", "/images/products/kod-14-2.jpg"]
+     */
+    images: z.array(z.string()).optional(),
+
+    /**
+     * Kısa açıklama (opsiyonel)
+     * Örnek: "Yumuşak pamuklu, kaymaz tabanlı bebek çorabı"
+     */
+    description: z.string().optional(),
+
+    /**
+     * Paket başına adet (opsiyonel)
+     * Örnek: 3, 6, 12
+     */
+    pieces_per_pack: z.number().optional(),
 
     /**
      * WhatsApp sipariş mesajı (opsiyonel)

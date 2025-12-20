@@ -1,15 +1,7 @@
 ---
 /**
  * DigitalCatalog.astro
- * Profesyonel dergi tarzı dijital ürün kataloğu
- * 
- * Özellikler:
- * - Sol sayfa: Ürün listesi (tıklanabilir items)
- * - Sağ sayfa: Seçili ürün görseli + badge'ler
- * - Zoom modal: fullscreen görsel, close, ESC, dışına tıklama
- * - WhatsApp butonu modal içinde
- * - Sayfa navigasyonu (6 ürün/sayfa)
- * - Mobil responsive
+ * Profesyonel dijital ürün kataloğu - Arama ve Filtre ile
  */
 
 import { getCollection } from 'astro:content';
@@ -27,90 +19,113 @@ const allProducts = await getCollection('products', ({ id }) => {
 
 // Ürün verilerini JSON formatına dönüştür
 const productsData = allProducts.map((product) => ({
-  code: product.data.sku,
-  title: product.data.title,
-  age: product.data.age_group,
-  category: product.data.category,
-  image: product.data.cover_image,
-  features: product.data.features
+  code: product.data.sku || 'N/A',
+  title: product.data.title || '',
+  age: product.data.age_group || '',
+  category: product.data.category || 'bebek',
+  image: product.data.cover_image || '/images/placeholder.png',
+  features: product.data.features || []
 }));
 
 // Metinler
 const texts = {
   tr: {
-    title: 'Dijital Ürün Kataloğu',
+    title: 'Ürün Kataloğu',
     subtitle: 'Ürüne tıklayarak detayları görüntüleyin',
+    searchPlaceholder: 'Ürün kodu veya isim ara...',
     allProducts: 'Tüm Ürünler',
     babyProducts: 'Bebek Çorapları',
     childProducts: 'Çocuk Çorapları',
     askWhatsapp: 'WhatsApp ile Bilgi Al',
-    close: 'Kapat',
-    productCode: 'Ürün Kodu',
-    clickToZoom: 'Büyütmek için tıklayın'
+    clickToZoom: 'Büyütmek için tıklayın',
+    noResults: 'Sonuç bulunamadı',
+    clearSearch: 'Aramayı Temizle'
   },
   en: {
-    title: 'Digital Product Catalog',
+    title: 'Product Catalog',
     subtitle: 'Click on a product to view details',
+    searchPlaceholder: 'Search by code or name...',
     allProducts: 'All Products',
     babyProducts: 'Baby Socks',
     childProducts: 'Children Socks',
     askWhatsapp: 'Get Info via WhatsApp',
-    close: 'Close',
-    productCode: 'Product Code',
-    clickToZoom: 'Click to zoom'
+    clickToZoom: 'Click to zoom',
+    noResults: 'No results found',
+    clearSearch: 'Clear Search'
   }
 };
 
 const t = texts[lang];
-
-// WhatsApp numarası
 const phoneNumber = '905369205969';
-
-// Sayfa başına ürün sayısı
 const itemsPerPage = 6;
 ---
 
 <section id="catalogSection" class="catalog-section">
-  <div class="catalog-background"></div>
-  
-  <div class="catalog-wrapper">
-    <!-- Başlık -->
-    <div class="catalog-header">
-      <h2 class="catalog-title">{t.title}</h2>
-      <p class="catalog-subtitle">{t.subtitle}</p>
+  <div class="container py-12 md:py-16 lg:py-20">
+    <!-- Header -->
+    <div class="text-center mb-8 md:mb-12">
+      <span class="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-600 text-sm font-medium mb-4">
+        Dijital Katalog
+      </span>
+      <h2 class="heading-xl mb-4">{t.title}</h2>
+      <p class="text-body-lg max-w-2xl mx-auto">{t.subtitle}</p>
     </div>
 
-    <!-- Kategori Tab Menüsü -->
-    <div class="category-tabs" id="categoryTabs">
-      <button class="category-tab active" data-category="all">
-        {t.allProducts}
-      </button>
-      <button class="category-tab" data-category="bebek">
-        {t.babyProducts}
-      </button>
-      <button class="category-tab" data-category="cocuk">
-        {t.childProducts}
-      </button>
+    <!-- Search & Filter Bar -->
+    <div class="flex flex-col md:flex-row gap-4 mb-8">
+      <!-- Search Input -->
+      <div class="relative flex-1 max-w-md mx-auto md:mx-0">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input 
+          type="text" 
+          id="searchInput"
+          placeholder={t.searchPlaceholder}
+          class="w-full pl-12 pr-10 py-3 rounded-full border border-slate-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 outline-none transition-all"
+        />
+        <button 
+          id="clearSearchBtn"
+          class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 hidden"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Category Tabs -->
+      <div class="flex justify-center md:justify-end gap-2 flex-wrap" id="categoryTabs">
+        <button class="category-tab active" data-category="all">{t.allProducts}</button>
+        <button class="category-tab" data-category="bebek">{t.babyProducts}</button>
+        <button class="category-tab" data-category="cocuk">{t.childProducts}</button>
+      </div>
     </div>
 
-    <!-- Katalog Ana Container -->
-    <div class="catalog-container">
-      
-      <!-- Sol Sayfa - Ürün Listesi -->
-      <div class="left-card">
-        <div class="product-list" id="productList">
-          <!-- JavaScript ile doldurulacak -->
+    <!-- Catalog Container -->
+    <div class="catalog-grid">
+      <!-- Left Panel - Product List -->
+      <div class="left-panel">
+        <div class="product-list" id="productList"></div>
+        
+        <!-- No Results -->
+        <div class="no-results hidden" id="noResults">
+          <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p class="text-white/70">{t.noResults}</p>
+          <button id="clearFiltersBtn" class="mt-3 text-sm text-pink-300 hover:text-pink-200">{t.clearSearch}</button>
         </div>
         
-        <!-- Sayfa Navigasyonu -->
-        <div class="page-navigation">
-          <button class="page-nav-btn" id="prevPageBtn" disabled>
+        <!-- Pagination -->
+        <div class="page-nav" id="pageNavigation">
+          <button class="page-btn" id="prevPageBtn" disabled>
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span class="page-counter" id="pageCounter">1-6 / 6</span>
-          <button class="page-nav-btn" id="nextPageBtn">
+          <span class="page-count" id="pageCounter">1-6 / 6</span>
+          <button class="page-btn" id="nextPageBtn">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
@@ -118,422 +133,267 @@ const itemsPerPage = 6;
         </div>
       </div>
       
-      <!-- Sağ Sayfa - Ürün Detay Görseli -->
-      <div class="right-card">
-        <div class="product-image-container" id="productImageContainer">
-          <img 
-            src="/images/placeholder.png" 
-            alt="Ürün Görseli"
-            id="mainProductImage"
-            class="product-image"
-          />
-          
-          <!-- Ürün Kodu Badge -->
-          <div class="product-code-badge" id="productCodeBadge">
-            KOD 01
+      <!-- Right Panel - Product Detail -->
+      <div class="right-panel">
+        <div class="image-box" id="productImageContainer">
+          <img src="/images/placeholder.png" alt="Ürün" id="mainProductImage" class="main-image" />
+          <div class="badges">
+            <span class="badge badge-pink" id="ageBadge">3 Yaş</span>
+            <span class="badge badge-blue" id="productCodeBadge">KOD 01</span>
           </div>
-          
-          <!-- Yaş Badge -->
-          <div class="age-badge" id="ageBadge">
-            3 Yaş
-          </div>
-          
-          <!-- Zoom İpucu -->
-          <div class="zoom-hint">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <div class="zoom-tip">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
             <span>{t.clickToZoom}</span>
           </div>
         </div>
         
-        <!-- Ürün Bilgileri -->
-        <div class="product-info">
-          <h3 class="product-title" id="productTitle">Ürün Başlığı</h3>
-          <div class="product-features" id="productFeatures">
-            <!-- JavaScript ile doldurulacak -->
-          </div>
+        <div class="product-detail">
+          <h3 class="detail-title" id="productTitle">Ürün Başlığı</h3>
+          <div class="detail-features" id="productFeatures"></div>
+          <a href="#" id="quickWhatsappBtn" target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            <span>{t.askWhatsapp}</span>
+          </a>
         </div>
       </div>
-      
     </div>
   </div>
 </section>
 
 <!-- Zoom Modal -->
 <div class="zoom-modal" id="zoomModal">
-  <div class="zoom-overlay" id="zoomOverlay"></div>
-  <div class="zoom-container">
-    <button class="zoom-close-btn" id="zoomCloseBtn">
+  <div class="zoom-bg" id="zoomOverlay"></div>
+  <div class="zoom-content">
+    <button class="zoom-close" id="zoomCloseBtn">
       <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
-    
-    <img 
-      src="/images/placeholder.png" 
-      alt="Büyütülmüş Görsel"
-      id="zoomImage"
-      class="zoom-image"
-    />
-    
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <a 
-        href="#" 
-        id="whatsappButton"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="whatsapp-button"
-      >
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-        </svg>
-        <span>{t.askWhatsapp}</span>
-      </a>
-    </div>
+    <img src="/images/placeholder.png" alt="Zoom" id="zoomImage" class="zoom-img" />
+    <a href="#" id="whatsappButton" target="_blank" rel="noopener noreferrer" class="zoom-whatsapp">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      <span>{t.askWhatsapp}</span>
+    </a>
   </div>
 </div>
 
-<!-- Ürün Verileri -->
+<!-- Data -->
 <script is:inline define:vars={{ productsData, phoneNumber, itemsPerPage, lang }}>
-  window.catalogData = {
-    products: productsData,
-    phoneNumber: phoneNumber,
-    itemsPerPage: itemsPerPage,
-    lang: lang
-  };
+  window.catalogData = { products: productsData, phoneNumber, itemsPerPage, lang };
 </script>
 
 <style>
-  /* ==================== CATALOG SECTION ==================== */
-  .catalog-section {
-    position: relative;
-    min-height: 100vh;
-    padding: 60px 20px;
-    overflow: hidden;
-  }
-  
-  .catalog-background {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-    z-index: 0;
-  }
-  
-  .catalog-wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  
-  /* ==================== HEADER ==================== */
-  .catalog-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  .catalog-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 10px;
-  }
-  
-  .catalog-subtitle {
-    font-size: 1.125rem;
-    color: #cbd5e1;
-  }
-  
-  /* ==================== CATEGORY TABS ==================== */
-  .category-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-  }
+  .catalog-section { background: linear-gradient(180deg, #f8fafc 0%, #fff 100%); }
   
   .category-tab {
-    padding: 12px 24px;
-    border-radius: 20px;
-    background: #ffffff;
-    border: 2px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    background: white;
+    border: 1px solid #e2e8f0;
     color: #475569;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
   }
-  
-  .category-tab:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+  .category-tab:hover { border-color: #ec4899; color: #ec4899; }
+  .category-tab.active { background: #ec4899; border-color: #ec4899; color: white; }
+
+  .catalog-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
-  
-  .category-tab.active {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: #ffffff;
+  @media (min-width: 768px) {
+    .catalog-grid { grid-template-columns: 320px 1fr; gap: 32px; }
   }
-  
-  /* ==================== CATALOG CONTAINER ==================== */
-  .catalog-container {
-    display: flex;
-    gap: 4%;
-    min-height: 600px;
+  @media (min-width: 1024px) {
+    .catalog-grid { grid-template-columns: 360px 1fr; }
   }
-  
-  /* ==================== LEFT CARD - PRODUCT LIST ==================== */
-  .left-card {
-    width: 35%;
+
+  .left-panel {
     background: linear-gradient(180deg, #1e3a5f 0%, #2563eb 100%);
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
+    max-height: 600px;
   }
-  
+  @media (min-width: 768px) { .left-panel { max-height: 700px; } }
+
   .product-list {
     flex: 1;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
-    max-height: 500px;
+    gap: 8px;
   }
-  
+
   .product-item {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     border: 2px solid transparent;
   }
-  
-  .product-item:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-  
-  .product-item.active {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: #ffffff;
-  }
-  
-  .product-item-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
+  .product-item:hover { background: rgba(255,255,255,0.15); transform: translateX(4px); }
+  .product-item.active { background: rgba(255,255,255,0.2); border-color: white; }
+
+  .product-item-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
     object-fit: cover;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.1);
+    flex-shrink: 0;
   }
-  
-  .product-item-info {
-    flex: 1;
-  }
-  
-  .product-item-code {
-    font-size: 16px;
-    font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 4px;
-  }
-  
-  .product-item-age {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  
-  /* ==================== PAGE NAVIGATION ==================== */
-  .page-navigation {
+
+  .product-item-info { flex: 1; min-width: 0; }
+  .product-item-code { font-size: 15px; font-weight: 700; color: white; }
+  .product-item-title { font-size: 12px; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-item-age { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+  .no-results { text-align: center; padding: 40px 20px; }
+
+  .page-nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.15);
   }
-  
-  .page-nav-btn {
-    width: 40px;
-    height: 40px;
+  .page-btn {
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.15);
     border: none;
-    border-radius: 50%;
-    color: #ffffff;
+    border-radius: 10px;
+    color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
   }
-  
-  .page-nav-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.3);
+  .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.25); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .page-count { font-size: 13px; color: rgba(255,255,255,0.8); font-weight: 500; }
+
+  .right-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
   }
-  
-  .page-nav-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
-  .page-counter {
-    font-size: 14px;
-    color: #ffffff;
-    font-weight: 500;
-  }
-  
-  /* ==================== RIGHT CARD - PRODUCT DETAIL ==================== */
-  .right-card {
-    width: 61%;
-    background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%);
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .product-image-container {
+
+  .image-box {
     position: relative;
     width: 100%;
-    height: 500px;
-    background: #f1f5f9;
-    border-radius: 8px;
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
     margin-bottom: 20px;
   }
-  
-  .product-image {
+  @media (min-width: 768px) { .image-box { aspect-ratio: 16/10; } }
+
+  .main-image {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
+    object-fit: contain;
+    padding: 16px;
+    transition: transform 0.3s;
   }
-  
-  .product-image-container:hover .product-image {
-    transform: scale(1.02);
-  }
-  
-  /* ==================== BADGES ==================== */
-  .product-code-badge {
+  .image-box:hover .main-image { transform: scale(1.03); }
+
+  .badges {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(37, 99, 235, 0.9);
-    padding: 8px 16px;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+  }
+  .badge {
+    padding: 6px 14px;
     border-radius: 20px;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
+    font-size: 13px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
   }
-  
-  .age-badge {
+  .badge-pink { background: rgba(236,72,153,0.9); color: white; }
+  .badge-blue { background: rgba(59,130,246,0.9); color: white; }
+
+  .zoom-tip {
     position: absolute;
-    top: 20px;
-    right: 120px;
-    background: rgba(236, 72, 153, 0.9);
-    padding: 8px 16px;
-    border-radius: 20px;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-  }
-  
-  .product-image-container:hover .product-code-badge,
-  .product-image-container:hover .age-badge {
-    opacity: 1;
-  }
-  
-  .zoom-hint {
-    position: absolute;
-    bottom: 20px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 8px 16px;
+    gap: 6px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    padding: 6px 14px;
     border-radius: 20px;
-    color: #ffffff;
+    color: white;
     font-size: 12px;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s;
   }
-  
-  .product-image-container:hover .zoom-hint {
-    opacity: 1;
-  }
-  
-  /* ==================== PRODUCT INFO ==================== */
-  .product-info {
-    flex: 1;
-  }
-  
-  .product-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 15px;
-  }
-  
-  .product-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
+  .image-box:hover .zoom-tip { opacity: 1; }
+
+  .product-detail { padding-top: 4px; }
+  .detail-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 12px; }
+  .detail-features { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
   .feature-tag {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 4px;
+    padding: 5px 12px;
     background: #eff6ff;
     border-radius: 20px;
     color: #3b82f6;
     font-size: 12px;
     font-weight: 500;
   }
-  
-  .feature-tag svg {
-    width: 14px;
-    height: 14px;
-  }
-  
-  /* ==================== ZOOM MODAL ==================== */
-  .zoom-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-  }
-  
-  .zoom-modal.active {
+  .feature-tag svg { width: 12px; height: 12px; }
+
+  .whatsapp-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 24px;
+    background: #22c55e;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(34,197,94,0.3);
   }
-  
-  .zoom-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-  }
-  
-  .zoom-container {
+  .whatsapp-btn:hover { background: #16a34a; transform: translateY(-2px); }
+
+  .zoom-modal { display: none; position: fixed; inset: 0; z-index: 1000; }
+  .zoom-modal.active { display: flex; align-items: center; justify-content: center; }
+  .zoom-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); }
+  .zoom-content {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -541,128 +401,41 @@ const itemsPerPage = 6;
     gap: 20px;
     padding: 20px;
     z-index: 1;
+    max-width: 90vw;
   }
-  
-  .zoom-close-btn {
+  .zoom-close {
     position: absolute;
-    top: -40px;
+    top: -50px;
     right: 0;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 50%;
-    color: #ffffff;
+    color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
   }
-  
-  .zoom-close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-  
-  .zoom-image {
-    max-width: 80vw;
-    max-height: 80vh;
-    object-fit: contain;
-    border-radius: 8px;
-  }
-  
-  .action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .whatsapp-button {
+  .zoom-close:hover { background: rgba(255,255,255,0.2); }
+  .zoom-img { max-width: 80vw; max-height: 70vh; object-fit: contain; border-radius: 12px; background: white; }
+  .zoom-whatsapp {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     background: #22c55e;
-    padding: 12px 32px;
-    border-radius: 8px;
-    color: #ffffff;
+    padding: 14px 32px;
+    border-radius: 12px;
+    color: white;
     font-size: 16px;
     font-weight: 700;
     text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.4);
   }
-  
-  .whatsapp-button:hover {
-    background: #16a34a;
-    transform: translateY(-2px);
-  }
-  
-  /* ==================== MOBILE RESPONSIVE ==================== */
-  @media (max-width: 768px) {
-    .catalog-section {
-      padding: 40px 15px;
-      min-height: auto;
-    }
-    
-    .catalog-title {
-      font-size: 1.75rem;
-    }
-    
-    .catalog-subtitle {
-      font-size: 1rem;
-    }
-    
-    .category-tabs {
-      gap: 8px;
-    }
-    
-    .category-tab {
-      padding: 10px 16px;
-      font-size: 12px;
-    }
-    
-    .catalog-container {
-      flex-direction: column;
-      gap: 20px;
-    }
-    
-    .left-card {
-      width: 100%;
-      height: auto;
-      padding: 20px;
-    }
-    
-    .product-list {
-      max-height: 300px;
-    }
-    
-    .right-card {
-      width: 100%;
-      padding: 20px;
-    }
-    
-    .product-image-container {
-      height: 400px;
-    }
-    
-    .age-badge {
-      right: auto;
-      left: 20px;
-    }
-    
-    .product-title {
-      font-size: 20px;
-    }
-    
-    .zoom-image {
-      max-height: 60vh;
-    }
-    
-    .whatsapp-button {
-      padding: 10px 24px;
-      font-size: 14px;
-    }
-  }
+  .zoom-whatsapp:hover { background: #16a34a; transform: translateY(-2px); }
 </style>
 
 <script>
@@ -672,9 +445,8 @@ const itemsPerPage = 6;
     
     const { products, phoneNumber, itemsPerPage, lang } = data;
     
-    // DOM Elements
     const productList = document.getElementById('productList');
-    const mainProductImage = document.getElementById('mainProductImage') as HTMLImageElement;
+    const mainProductImage = document.getElementById('mainProductImage') as HTMLImageElement | null;
     const productCodeBadge = document.getElementById('productCodeBadge');
     const ageBadge = document.getElementById('ageBadge');
     const productTitle = document.getElementById('productTitle');
@@ -683,171 +455,169 @@ const itemsPerPage = 6;
     const zoomModal = document.getElementById('zoomModal');
     const zoomOverlay = document.getElementById('zoomOverlay');
     const zoomCloseBtn = document.getElementById('zoomCloseBtn');
-    const zoomImage = document.getElementById('zoomImage') as HTMLImageElement;
-    const whatsappButton = document.getElementById('whatsappButton') as HTMLAnchorElement;
+    const zoomImage = document.getElementById('zoomImage') as HTMLImageElement | null;
+    const whatsappButton = document.getElementById('whatsappButton') as HTMLAnchorElement | null;
+    const quickWhatsappBtn = document.getElementById('quickWhatsappBtn') as HTMLAnchorElement | null;
     const categoryTabs = document.querySelectorAll('.category-tab');
-    const prevPageBtn = document.getElementById('prevPageBtn') as HTMLButtonElement;
-    const nextPageBtn = document.getElementById('nextPageBtn') as HTMLButtonElement;
+    const prevPageBtn = document.getElementById('prevPageBtn') as HTMLButtonElement | null;
+    const nextPageBtn = document.getElementById('nextPageBtn') as HTMLButtonElement | null;
     const pageCounter = document.getElementById('pageCounter');
+    const pageNavigation = document.getElementById('pageNavigation');
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement | null;
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const noResults = document.getElementById('noResults');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
     
     let currentPage = 0;
     let filteredProducts = [...products];
     let activeProductIndex = 0;
+    let searchQuery = '';
+    let activeCategory = 'all';
     
-    // Ürün listesini render et
+    function filterProducts() {
+      let result = [...products];
+      if (activeCategory !== 'all') {
+        result = result.filter((p: any) => p.category === activeCategory);
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        result = result.filter((p: any) => p.code.toLowerCase().includes(q) || p.title.toLowerCase().includes(q));
+      }
+      filteredProducts = result;
+      currentPage = 0;
+      activeProductIndex = 0;
+      renderProductList();
+      
+      if (filteredProducts.length > 0) {
+        selectProduct(0);
+        noResults?.classList.add('hidden');
+        pageNavigation?.classList.remove('hidden');
+      } else {
+        noResults?.classList.remove('hidden');
+        pageNavigation?.classList.add('hidden');
+      }
+    }
+    
     function renderProductList() {
       if (!productList) return;
+      const start = currentPage * itemsPerPage;
+      const end = Math.min(start + itemsPerPage, filteredProducts.length);
+      const pageProducts = filteredProducts.slice(start, end);
       
-      const startIndex = currentPage * itemsPerPage;
-      const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
-      const pageProducts = filteredProducts.slice(startIndex, endIndex);
-      
-      productList.innerHTML = pageProducts.map((product: any, index: number) => `
-        <div class="product-item ${startIndex + index === activeProductIndex ? 'active' : ''}" data-index="${startIndex + index}">
-          <img src="${product.image}" alt="${product.title}" class="product-item-image" onerror="this.src='/images/placeholder.png'" />
+      productList.innerHTML = pageProducts.map((p: any, i: number) => `
+        <div class="product-item ${start + i === activeProductIndex ? 'active' : ''}" data-index="${start + i}">
+          <img src="${p.image}" alt="${p.title}" class="product-item-img" onerror="this.src='/images/placeholder.png'" loading="lazy" />
           <div class="product-item-info">
-            <div class="product-item-code">${product.code}</div>
-            <div class="product-item-age">${product.age}</div>
+            <div class="product-item-code">${p.code}</div>
+            <div class="product-item-title">${p.title}</div>
+            <div class="product-item-age">${p.age}</div>
           </div>
         </div>
       `).join('');
       
-      // Click events
       productList.querySelectorAll('.product-item').forEach(item => {
         item.addEventListener('click', () => {
-          const index = parseInt(item.getAttribute('data-index') || '0');
-          selectProduct(index);
+          const idx = parseInt(item.getAttribute('data-index') || '0');
+          selectProduct(idx);
         });
       });
       
-      // Update page counter
       updatePageCounter();
     }
     
-    // Sayfa sayacını güncelle
     function updatePageCounter() {
-      if (!pageCounter) return;
-      
-      const startIndex = currentPage * itemsPerPage + 1;
-      const endIndex = Math.min((currentPage + 1) * itemsPerPage, filteredProducts.length);
-      pageCounter.textContent = `${startIndex}-${endIndex} / ${filteredProducts.length}`;
-      
-      // Button states
+      if (!pageCounter || filteredProducts.length === 0) return;
+      const start = currentPage * itemsPerPage + 1;
+      const end = Math.min((currentPage + 1) * itemsPerPage, filteredProducts.length);
+      pageCounter.textContent = `${start}-${end} / ${filteredProducts.length}`;
       if (prevPageBtn) prevPageBtn.disabled = currentPage === 0;
       if (nextPageBtn) nextPageBtn.disabled = (currentPage + 1) * itemsPerPage >= filteredProducts.length;
     }
     
-    // Ürün seç
     function selectProduct(index: number) {
       activeProductIndex = index;
-      const product = filteredProducts[index];
-      if (!product) return;
+      const p = filteredProducts[index];
+      if (!p) return;
       
-      // Update UI
       if (mainProductImage) {
-        mainProductImage.src = product.image;
-        mainProductImage.alt = product.title;
+        mainProductImage.src = p.image;
+        mainProductImage.alt = p.title;
+        mainProductImage.onerror = () => { mainProductImage.src = '/images/placeholder.png'; };
       }
-      if (productCodeBadge) productCodeBadge.textContent = product.code;
-      if (ageBadge) ageBadge.textContent = product.age;
-      if (productTitle) productTitle.textContent = product.title;
+      if (productCodeBadge) productCodeBadge.textContent = p.code;
+      if (ageBadge) ageBadge.textContent = p.age;
+      if (productTitle) productTitle.textContent = p.title;
       
-      // Features
       if (productFeatures) {
-        productFeatures.innerHTML = product.features.map((feature: string) => `
+        productFeatures.innerHTML = (p.features || []).map((f: string) => `
           <span class="feature-tag">
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            ${feature}
+            <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+            ${f}
           </span>
         `).join('');
       }
       
-      // Update WhatsApp link
-      const whatsappMsg = lang === 'tr' 
-        ? `Merhaba, ${product.code} ürünü hakkında bilgi almak istiyorum.`
-        : `Hello, I would like information about product ${product.code}.`;
-      if (whatsappButton) {
-        whatsappButton.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMsg)}`;
-      }
+      const msg = lang === 'tr' 
+        ? `Merhaba, ${p.code} - ${p.title} (${p.age}) ürünü hakkında bilgi almak istiyorum.`
+        : `Hello, I would like information about ${p.code} - ${p.title} (${p.age}).`;
+      const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`;
+      if (whatsappButton) whatsappButton.href = url;
+      if (quickWhatsappBtn) quickWhatsappBtn.href = url;
+      if (zoomImage) { zoomImage.src = p.image; zoomImage.alt = p.title; }
       
-      // Update zoom image
-      if (zoomImage) {
-        zoomImage.src = product.image;
-        zoomImage.alt = product.title;
-      }
-      
-      // Update active class
       productList?.querySelectorAll('.product-item').forEach((item) => {
-        const itemIndex = parseInt(item.getAttribute('data-index') || '0');
-        item.classList.toggle('active', itemIndex === index);
+        const idx = parseInt(item.getAttribute('data-index') || '0');
+        item.classList.toggle('active', idx === index);
       });
     }
     
-    // Zoom modal
-    function openZoom() {
-      zoomModal?.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
+    function openZoom() { zoomModal?.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeZoom() { zoomModal?.classList.remove('active'); document.body.style.overflow = ''; }
     
-    function closeZoom() {
-      zoomModal?.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-    
-    // Event Listeners
     productImageContainer?.addEventListener('click', openZoom);
     zoomCloseBtn?.addEventListener('click', closeZoom);
     zoomOverlay?.addEventListener('click', closeZoom);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeZoom(); });
     
-    // ESC tuşu
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeZoom();
-    });
-    
-    // Kategori filtreleme
     categoryTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         categoryTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
-        const category = tab.getAttribute('data-category');
-        
-        if (category === 'all') {
-          filteredProducts = [...products];
-        } else {
-          filteredProducts = products.filter((p: any) => p.category === category);
-        }
-        
-        currentPage = 0;
-        activeProductIndex = 0;
-        renderProductList();
-        if (filteredProducts.length > 0) {
-          selectProduct(0);
-        }
+        activeCategory = tab.getAttribute('data-category') || 'all';
+        filterProducts();
       });
     });
     
-    // Sayfa navigasyonu
-    prevPageBtn?.addEventListener('click', () => {
-      if (currentPage > 0) {
-        currentPage--;
-        renderProductList();
-      }
+    let searchTimeout: any;
+    searchInput?.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        searchQuery = searchInput.value.trim();
+        filterProducts();
+        clearSearchBtn?.classList.toggle('hidden', !searchQuery);
+      }, 300);
     });
     
-    nextPageBtn?.addEventListener('click', () => {
-      if ((currentPage + 1) * itemsPerPage < filteredProducts.length) {
-        currentPage++;
-        renderProductList();
-      }
+    clearSearchBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      filterProducts();
+      clearSearchBtn.classList.add('hidden');
     });
     
-    // İlk yükleme
-    renderProductList();
-    if (filteredProducts.length > 0) {
-      selectProduct(0);
-    }
+    clearFiltersBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      activeCategory = 'all';
+      categoryTabs.forEach(t => t.classList.remove('active'));
+      document.querySelector('.category-tab[data-category="all"]')?.classList.add('active');
+      filterProducts();
+      clearSearchBtn?.classList.add('hidden');
+    });
+    
+    prevPageBtn?.addEventListener('click', () => { if (currentPage > 0) { currentPage--; renderProductList(); } });
+    nextPageBtn?.addEventListener('click', () => { if ((currentPage + 1) * itemsPerPage < filteredProducts.length) { currentPage++; renderProductList(); } });
+    
+    filterProducts();
   });
 </script>

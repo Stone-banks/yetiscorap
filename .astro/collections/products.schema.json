@@ -27,7 +27,20 @@
           }
         },
         "cover_image": {
+          "type": "string",
+          "default": "/images/placeholder.png"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
           "type": "string"
+        },
+        "pieces_per_pack": {
+          "type": "number"
         },
         "whatsapp_msg": {
           "type": "string"
@@ -54,8 +67,7 @@
         "sku",
         "category",
         "age_group",
-        "features",
-        "cover_image"
+        "features"
       ],
       "additionalProperties": false
     }
