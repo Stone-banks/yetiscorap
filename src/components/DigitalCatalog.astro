@@ -4,15 +4,11 @@
  * Profesyonel dergi tarzı dijital ürün kataloğu
  * 
  * Özellikler:
- * - 100vh yükseklikte tam ekran section
- * - Sol ve sağ sayfa yan yana (çift sayfa spread)
- * - Sol sayfa: koyu gradient, büyük ürün kodu, 6 görsel grid
- * - Sağ sayfa: krem/beyaz, ürün bilgileri, özellikler tablosu
- * - Kategori tab menüsü
- * - Sayfa navigasyonu (ok butonları + sayfa numarası)
- * - Zoom özelliği (modal)
- * - PDF indirme butonu
- * - WhatsApp ile soru sor
+ * - Sol sayfa: Ürün listesi (tıklanabilir items)
+ * - Sağ sayfa: Seçili ürün görseli + badge'ler
+ * - Zoom modal: fullscreen görsel, close, ESC, dışına tıklama
+ * - WhatsApp butonu modal içinde
+ * - Sayfa navigasyonu (6 ürün/sayfa)
  * - Mobil responsive
  */
 
@@ -29,78 +25,52 @@ const allProducts = await getCollection('products', ({ id }) => {
   return id.startsWith(`${lang}/`);
 });
 
-// Kategorilere göre grupla
-const productsByCategory = allProducts.reduce((acc, product) => {
-  const category = product.data.category;
-  if (!acc[category]) {
-    acc[category] = [];
-  }
-  acc[category].push(product);
-  return acc;
-}, {} as Record<string, typeof allProducts>);
-
-// Kategori isimleri
-const categoryNames = {
-  tr: {
-    bebek: 'Bebek Çorapları',
-    cocuk: 'Çocuk Çorapları'
-  },
-  en: {
-    bebek: 'Baby Socks',
-    cocuk: 'Children Socks'
-  }
-};
+// Ürün verilerini JSON formatına dönüştür
+const productsData = allProducts.map((product) => ({
+  code: product.data.sku,
+  title: product.data.title,
+  age: product.data.age_group,
+  category: product.data.category,
+  image: product.data.cover_image,
+  features: product.data.features
+}));
 
 // Metinler
 const texts = {
   tr: {
     title: 'Dijital Ürün Kataloğu',
-    subtitle: 'Profesyonel toptan satış kataloğumuzu inceleyin',
+    subtitle: 'Ürüne tıklayarak detayları görüntüleyin',
     allProducts: 'Tüm Ürünler',
-    page: 'Sayfa',
-    downloadPdf: 'PDF İndir',
-    zoom: 'Büyüt',
-    askQuestion: 'Bu ürün için soru sor',
-    ageRange: 'Yaş Aralığı',
-    pieces: 'Adet/Paket',
-    features: 'Ürün Özellikleri',
-    material: 'Malzeme',
-    color: 'Renkler',
-    size: 'Beden',
+    babyProducts: 'Bebek Çorapları',
+    childProducts: 'Çocuk Çorapları',
+    askWhatsapp: 'WhatsApp ile Bilgi Al',
+    close: 'Kapat',
     productCode: 'Ürün Kodu',
-    close: 'Kapat'
+    clickToZoom: 'Büyütmek için tıklayın'
   },
   en: {
     title: 'Digital Product Catalog',
-    subtitle: 'Browse our professional wholesale catalog',
+    subtitle: 'Click on a product to view details',
     allProducts: 'All Products',
-    page: 'Page',
-    downloadPdf: 'Download PDF',
-    zoom: 'Zoom',
-    askQuestion: 'Ask about this product',
-    ageRange: 'Age Range',
-    pieces: 'Pcs/Pack',
-    features: 'Product Features',
-    material: 'Material',
-    color: 'Colors',
-    size: 'Size',
+    babyProducts: 'Baby Socks',
+    childProducts: 'Children Socks',
+    askWhatsapp: 'Get Info via WhatsApp',
+    close: 'Close',
     productCode: 'Product Code',
-    close: 'Close'
+    clickToZoom: 'Click to zoom'
   }
 };
 
 const t = texts[lang];
-const catNames = categoryNames[lang];
 
 // WhatsApp numarası
 const phoneNumber = '905369205969';
 
-// Tüm kategorileri al
-const categories = Object.keys(productsByCategory);
+// Sayfa başına ürün sayısı
+const itemsPerPage = 6;
 ---
 
 <section id="catalogSection" class="catalog-section">
-  <!-- Koyu arkaplan overlay -->
   <div class="catalog-background"></div>
   
   <div class="catalog-wrapper">
@@ -115,155 +85,77 @@ const categories = Object.keys(productsByCategory);
       <button class="category-tab active" data-category="all">
         {t.allProducts}
       </button>
-      {categories.map((cat) => (
-        <button class="category-tab" data-category={cat}>
-          {catNames[cat as keyof typeof catNames] || cat}
-        </button>
-      ))}
-    </div>
-
-    <!-- PDF İndir Butonu (Fixed) -->
-    <button class="download-pdf-btn" id="downloadPdfBtn">
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <span>{t.downloadPdf}</span>
-    </button>
-
-    <!-- Catalog Viewer -->
-    <div class="catalog-viewer" id="catalogViewer">
-      
-      {allProducts.map((product, index) => {
-        const { data } = product;
-        const whatsappMsg = lang === 'tr'
-          ? `Merhaba, ${data.sku} kodlu ürün hakkında bilgi almak istiyorum.`
-          : `Hello, I would like information about product ${data.sku}.`;
-        const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMsg)}`;
-        
-        return (
-          <div 
-            class={`catalog-spread ${index === 0 ? 'active' : ''}`}
-            data-page={index + 1}
-            data-category={data.category}
-          >
-            <!-- Sol Sayfa - Koyu gradient + Görseller -->
-            <div class="left-page">
-              <!-- Zoom butonu -->
-              <button class="page-zoom-btn" data-page="left" data-index={index}>
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                </svg>
-              </button>
-              
-              <!-- Ürün Kodu - Büyük -->
-              <div class="product-code">
-                {data.sku}
-              </div>
-              
-              <!-- Görsel Grid (2x3) -->
-              <div class="product-images-grid">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <div class="mini-image">
-                    {i === 0 && data.cover_image ? (
-                      <img
-                        src={data.cover_image}
-                        alt={`${data.title} - ${i + 1}`}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div class="image-placeholder">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <!-- WhatsApp Butonu -->
-              <a href={whatsappURL} target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                <span>{t.askQuestion}</span>
-              </a>
-            </div>
-            
-            <!-- Sağ Sayfa - Açık renk + Ürün bilgileri -->
-            <div class="right-page">
-              <!-- Zoom butonu -->
-              <button class="page-zoom-btn" data-page="right" data-index={index}>
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                </svg>
-              </button>
-              
-              <!-- Ürün Başlık -->
-              <h2 class="product-title">{data.title}</h2>
-              <p class="product-subtitle">{lang === 'tr' ? 'Kaliteli malzemeden üretilmiş, bebek ve çocuk sağlığına uygun çorap modeli.' : 'High-quality socks suitable for baby and child health.'}</p>
-              
-              <!-- Özellikler Grid -->
-              <div class="features-grid">
-                {data.features.slice(0, 4).map((feature) => (
-                  <div class="feature-card">
-                    <div class="feature-icon">
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                      </svg>
-                    </div>
-                    <span class="feature-text">{feature}</span>
-                  </div>
-                ))}
-              </div>
-              
-              <!-- Spesifikasyon Tablosu -->
-              <div class="specifications-table">
-                <h3 class="specs-title">{t.features}</h3>
-                <div class="spec-row">
-                  <span class="spec-label">{t.productCode}</span>
-                  <span class="spec-value">{data.sku}</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-label">{t.ageRange}</span>
-                  <span class="spec-value">{data.age_group}</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-label">{t.material}</span>
-                  <span class="spec-value">{lang === 'tr' ? 'Pamuklu Karışım' : 'Cotton Blend'}</span>
-                </div>
-              </div>
-              
-              <!-- Sayfa Numarası -->
-              <div class="page-number">
-                {t.page} {index + 1}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-      
-    </div>
-
-    <!-- Navigasyon Kontrolleri -->
-    <div class="navigation-controls">
-      <button class="nav-btn prev-btn" id="prevBtn" disabled>
-        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
+      <button class="category-tab" data-category="bebek">
+        {t.babyProducts}
       </button>
+      <button class="category-tab" data-category="cocuk">
+        {t.childProducts}
+      </button>
+    </div>
+
+    <!-- Katalog Ana Container -->
+    <div class="catalog-container">
       
-      <div class="page-indicator">
-        <span id="currentPageNum">1</span>
-        <span>/</span>
-        <span id="totalPages">{allProducts.length}</span>
+      <!-- Sol Sayfa - Ürün Listesi -->
+      <div class="left-card">
+        <div class="product-list" id="productList">
+          <!-- JavaScript ile doldurulacak -->
+        </div>
+        
+        <!-- Sayfa Navigasyonu -->
+        <div class="page-navigation">
+          <button class="page-nav-btn" id="prevPageBtn" disabled>
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <span class="page-counter" id="pageCounter">1-6 / 6</span>
+          <button class="page-nav-btn" id="nextPageBtn">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
       
-      <button class="nav-btn next-btn" id="nextBtn">
-        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      <!-- Sağ Sayfa - Ürün Detay Görseli -->
+      <div class="right-card">
+        <div class="product-image-container" id="productImageContainer">
+          <img 
+            src="/images/placeholder.png" 
+            alt="Ürün Görseli"
+            id="mainProductImage"
+            class="product-image"
+          />
+          
+          <!-- Ürün Kodu Badge -->
+          <div class="product-code-badge" id="productCodeBadge">
+            KOD 01
+          </div>
+          
+          <!-- Yaş Badge -->
+          <div class="age-badge" id="ageBadge">
+            3 Yaş
+          </div>
+          
+          <!-- Zoom İpucu -->
+          <div class="zoom-hint">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+            <span>{t.clickToZoom}</span>
+          </div>
+        </div>
+        
+        <!-- Ürün Bilgileri -->
+        <div class="product-info">
+          <h3 class="product-title" id="productTitle">Ürün Başlığı</h3>
+          <div class="product-features" id="productFeatures">
+            <!-- JavaScript ile doldurulacak -->
+          </div>
+        </div>
+      </div>
+      
     </div>
   </div>
 </section>
@@ -276,13 +168,42 @@ const categories = Object.keys(productsByCategory);
       <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
-      <span>{t.close}</span>
     </button>
-    <div class="zoom-content" id="zoomContent">
-      <!-- Zoomed content will be cloned here -->
+    
+    <img 
+      src="/images/placeholder.png" 
+      alt="Büyütülmüş Görsel"
+      id="zoomImage"
+      class="zoom-image"
+    />
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a 
+        href="#" 
+        id="whatsappButton"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="whatsapp-button"
+      >
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        <span>{t.askWhatsapp}</span>
+      </a>
     </div>
   </div>
 </div>
+
+<!-- Ürün Verileri -->
+<script is:inline define:vars={{ productsData, phoneNumber, itemsPerPage, lang }}>
+  window.catalogData = {
+    products: productsData,
+    phoneNumber: phoneNumber,
+    itemsPerPage: itemsPerPage,
+    lang: lang
+  };
+</script>
 
 <style>
   /* ==================== CATALOG SECTION ==================== */
@@ -357,265 +278,90 @@ const categories = Object.keys(productsByCategory);
     color: #ffffff;
   }
   
-  /* ==================== PDF DOWNLOAD BUTTON ==================== */
-  .download-pdf-btn {
-    position: fixed;
-    top: 100px;
-    right: 20px;
-    z-index: 100;
+  /* ==================== CATALOG CONTAINER ==================== */
+  .catalog-container {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: #22c55e;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
-    transition: all 0.2s ease;
-  }
-  
-  .download-pdf-btn:hover {
-    background: #16a34a;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.5);
-  }
-  
-  /* ==================== CATALOG VIEWER ==================== */
-  .catalog-viewer {
-    position: relative;
+    gap: 4%;
     min-height: 600px;
   }
   
-  /* ==================== CATALOG SPREAD ==================== */
-  .catalog-spread {
-    display: none;
-    gap: 4%;
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  .catalog-spread.active {
-    display: flex;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
-  }
-  
-  /* ==================== LEFT PAGE ==================== */
-  .left-page {
-    position: relative;
-    width: 48%;
+  /* ==================== LEFT CARD - PRODUCT LIST ==================== */
+  .left-card {
+    width: 35%;
     background: linear-gradient(180deg, #1e3a5f 0%, #2563eb 100%);
-    padding: 40px;
+    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
   }
   
-  .product-code {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    font-size: 48px;
-    font-weight: 700;
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  
-  .product-images-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 12px;
-    margin-top: 100px;
+  .product-list {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    max-height: 500px;
   }
   
-  .mini-image {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 12px;
-    overflow: hidden;
+  .product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
     background: rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease;
-  }
-  
-  .mini-image:hover {
-    transform: scale(1.05);
-  }
-  
-  .mini-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.4);
-  }
-  
-  .whatsapp-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-    padding: 14px 24px;
-    background: #22c55e;
-    color: #ffffff;
     border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
+    cursor: pointer;
     transition: all 0.2s ease;
+    border: 2px solid transparent;
   }
   
-  .whatsapp-btn:hover {
-    background: #16a34a;
-    transform: translateY(-2px);
+  .product-item:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
   
-  /* ==================== RIGHT PAGE ==================== */
-  .right-page {
-    position: relative;
-    width: 48%;
-    background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%);
-    padding: 40px;
+  .product-item.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #ffffff;
+  }
+  
+  .product-item-image {
+    width: 60px;
+    height: 60px;
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.1);
   }
   
-  .product-title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 10px;
-  }
-  
-  .product-subtitle {
-    font-size: 14px;
-    font-style: italic;
-    color: #64748b;
-    margin-bottom: 30px;
-    line-height: 1.6;
-  }
-  
-  /* ==================== FEATURES GRID ==================== */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-bottom: 30px;
-  }
-  
-  .feature-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 15px;
-    background: #eff6ff;
-    border-left: 4px solid #3b82f6;
-    border-radius: 0 8px 8px 0;
-  }
-  
-  .feature-icon {
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #3b82f6;
-    color: #ffffff;
-    border-radius: 50%;
-  }
-  
-  .feature-icon svg {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .feature-text {
-    font-size: 13px;
-    color: #1e293b;
-    font-weight: 500;
-  }
-  
-  /* ==================== SPECIFICATIONS TABLE ==================== */
-  .specifications-table {
+  .product-item-info {
     flex: 1;
   }
   
-  .specs-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e2e8f0;
+  .product-item-code {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 4px;
   }
   
-  .spec-row {
+  .product-item-age {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* ==================== PAGE NAVIGATION ==================== */
+  .page-navigation {
     display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #f1f5f9;
-  }
-  
-  .spec-label {
-    font-size: 14px;
-    color: #64748b;
-  }
-  
-  .spec-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1e293b;
-  }
-  
-  .page-number {
-    text-align: right;
-    margin-top: auto;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
     padding-top: 20px;
-    font-size: 14px;
-    color: #94a3b8;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
   }
   
-  /* ==================== PAGE ZOOM BUTTON ==================== */
-  .page-zoom-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
+  .page-nav-btn {
     width: 40px;
     height: 40px;
     display: flex;
@@ -623,74 +369,148 @@ const categories = Object.keys(productsByCategory);
     justify-content: center;
     background: rgba(255, 255, 255, 0.2);
     border: none;
-    border-radius: 8px;
-    color: #ffffff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-  }
-  
-  .right-page .page-zoom-btn {
-    background: rgba(0, 0, 0, 0.1);
-    color: #475569;
-  }
-  
-  .page-zoom-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-  }
-  
-  .right-page .page-zoom-btn:hover {
-    background: rgba(0, 0, 0, 0.2);
-  }
-  
-  /* ==================== NAVIGATION CONTROLS ==================== */
-  .navigation-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 30px;
-  }
-  
-  .nav-btn {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #3b82f6;
-    border: none;
     border-radius: 50%;
     color: #ffffff;
     cursor: pointer;
     transition: all 0.2s ease;
   }
   
-  .nav-btn:hover:not(:disabled) {
-    background: #60a5fa;
-    transform: scale(1.1);
+  .page-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
   }
   
-  .nav-btn:disabled {
-    background: #64748b;
-    cursor: not-allowed;
+  .page-nav-btn:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
   }
   
-  .page-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 18px;
+  .page-counter {
+    font-size: 14px;
     color: #ffffff;
     font-weight: 500;
   }
   
-  .page-indicator span:first-child {
+  /* ==================== RIGHT CARD - PRODUCT DETAIL ==================== */
+  .right-card {
+    width: 61%;
+    background: linear-gradient(180deg, #fefce8 0%, #ffffff 100%);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .product-image-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-image-container:hover .product-image {
+    transform: scale(1.02);
+  }
+  
+  /* ==================== BADGES ==================== */
+  .product-code-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(37, 99, 235, 0.9);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+  
+  .age-badge {
+    position: absolute;
+    top: 20px;
+    right: 120px;
+    background: rgba(236, 72, 153, 0.9);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+  
+  .product-image-container:hover .product-code-badge,
+  .product-image-container:hover .age-badge {
+    opacity: 1;
+  }
+  
+  .zoom-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #ffffff;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .product-image-container:hover .zoom-hint {
+    opacity: 1;
+  }
+  
+  /* ==================== PRODUCT INFO ==================== */
+  .product-info {
+    flex: 1;
+  }
+  
+  .product-title {
     font-size: 24px;
     font-weight: 700;
-    color: #60a5fa;
+    color: #1e293b;
+    margin-bottom: 15px;
+  }
+  
+  .product-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #eff6ff;
+    border-radius: 20px;
+    color: #3b82f6;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .feature-tag svg {
+    width: 14px;
+    height: 14px;
   }
   
   /* ==================== ZOOM MODAL ==================== */
@@ -702,60 +522,79 @@ const categories = Object.keys(productsByCategory);
   }
   
   .zoom-modal.active {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .zoom-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.8);
   }
   
   .zoom-container {
     position: relative;
-    width: 100%;
-    height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 40px;
+    gap: 20px;
+    padding: 20px;
+    z-index: 1;
   }
   
   .zoom-close-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: -40px;
+    right: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 50%;
     color: #ffffff;
-    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
-    z-index: 10;
   }
   
   .zoom-close-btn:hover {
     background: rgba(255, 255, 255, 0.2);
   }
   
-  .zoom-content {
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow: auto;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  .zoom-image {
+    max-width: 80vw;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
   }
   
-  .zoom-content .left-page,
-  .zoom-content .right-page {
-    width: 100%;
-    min-height: 80vh;
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .whatsapp-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #22c55e;
+    padding: 12px 32px;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .whatsapp-button:hover {
+    background: #16a34a;
+    transform: translateY(-2px);
   }
   
   /* ==================== MOBILE RESPONSIVE ==================== */
@@ -782,202 +621,233 @@ const categories = Object.keys(productsByCategory);
       font-size: 12px;
     }
     
-    .download-pdf-btn {
-      top: auto;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 16px;
-      font-size: 12px;
-    }
-    
-    .catalog-spread {
+    .catalog-container {
       flex-direction: column;
       gap: 20px;
     }
     
-    .left-page,
-    .right-page {
+    .left-card {
       width: 100%;
-      padding: 30px 20px;
+      height: auto;
+      padding: 20px;
     }
     
-    .product-code {
-      position: relative;
-      top: 0;
-      left: 0;
-      font-size: 32px;
-      margin-bottom: 20px;
+    .product-list {
+      max-height: 300px;
     }
     
-    .product-images-grid {
-      margin-top: 0;
-      gap: 8px;
+    .right-card {
+      width: 100%;
+      padding: 20px;
+    }
+    
+    .product-image-container {
+      height: 400px;
+    }
+    
+    .age-badge {
+      right: auto;
+      left: 20px;
     }
     
     .product-title {
-      font-size: 24px;
-    }
-    
-    .features-grid {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    
-    .feature-card {
-      padding: 12px;
-    }
-    
-    .navigation-controls {
-      margin-top: 20px;
-      gap: 20px;
-    }
-    
-    .nav-btn {
-      width: 44px;
-      height: 44px;
-    }
-    
-    .page-indicator {
-      font-size: 16px;
-    }
-    
-    .page-indicator span:first-child {
       font-size: 20px;
+    }
+    
+    .zoom-image {
+      max-height: 60vh;
+    }
+    
+    .whatsapp-button {
+      padding: 10px 24px;
+      font-size: 14px;
     }
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const spreads = document.querySelectorAll('.catalog-spread');
-    const tabs = document.querySelectorAll('.category-tab');
-    const prevBtn = document.getElementById('prevBtn') as HTMLButtonElement | null;
-    const nextBtn = document.getElementById('nextBtn') as HTMLButtonElement | null;
-    const currentPageNum = document.getElementById('currentPageNum');
-    const totalPagesEl = document.getElementById('totalPages');
+    const data = (window as any).catalogData;
+    if (!data) return;
+    
+    const { products, phoneNumber, itemsPerPage, lang } = data;
+    
+    // DOM Elements
+    const productList = document.getElementById('productList');
+    const mainProductImage = document.getElementById('mainProductImage') as HTMLImageElement;
+    const productCodeBadge = document.getElementById('productCodeBadge');
+    const ageBadge = document.getElementById('ageBadge');
+    const productTitle = document.getElementById('productTitle');
+    const productFeatures = document.getElementById('productFeatures');
+    const productImageContainer = document.getElementById('productImageContainer');
     const zoomModal = document.getElementById('zoomModal');
     const zoomOverlay = document.getElementById('zoomOverlay');
     const zoomCloseBtn = document.getElementById('zoomCloseBtn');
-    const zoomContent = document.getElementById('zoomContent');
-    const zoomBtns = document.querySelectorAll('.page-zoom-btn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const zoomImage = document.getElementById('zoomImage') as HTMLImageElement;
+    const whatsappButton = document.getElementById('whatsappButton') as HTMLAnchorElement;
+    const categoryTabs = document.querySelectorAll('.category-tab');
+    const prevPageBtn = document.getElementById('prevPageBtn') as HTMLButtonElement;
+    const nextPageBtn = document.getElementById('nextPageBtn') as HTMLButtonElement;
+    const pageCounter = document.getElementById('pageCounter');
     
     let currentPage = 0;
-    let filteredSpreads: Element[] = Array.from(spreads);
+    let filteredProducts = [...products];
+    let activeProductIndex = 0;
     
-    // Sayfa güncelle
-    function updatePage(animate = true) {
-      spreads.forEach(spread => spread.classList.remove('active'));
+    // Ürün listesini render et
+    function renderProductList() {
+      if (!productList) return;
       
-      if (filteredSpreads[currentPage]) {
-        if (animate) {
-          (filteredSpreads[currentPage] as HTMLElement).style.animation = 'fadeIn 0.3s ease-out';
-        }
-        filteredSpreads[currentPage].classList.add('active');
-      }
+      const startIndex = currentPage * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+      const pageProducts = filteredProducts.slice(startIndex, endIndex);
       
-      if (currentPageNum) currentPageNum.textContent = String(currentPage + 1);
-      if (totalPagesEl) totalPagesEl.textContent = String(filteredSpreads.length);
+      productList.innerHTML = pageProducts.map((product: any, index: number) => `
+        <div class="product-item ${startIndex + index === activeProductIndex ? 'active' : ''}" data-index="${startIndex + index}">
+          <img src="${product.image}" alt="${product.title}" class="product-item-image" onerror="this.src='/images/placeholder.png'" />
+          <div class="product-item-info">
+            <div class="product-item-code">${product.code}</div>
+            <div class="product-item-age">${product.age}</div>
+          </div>
+        </div>
+      `).join('');
       
-      if (prevBtn) prevBtn.disabled = currentPage === 0;
-      if (nextBtn) nextBtn.disabled = currentPage >= filteredSpreads.length - 1;
+      // Click events
+      productList.querySelectorAll('.product-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const index = parseInt(item.getAttribute('data-index') || '0');
+          selectProduct(index);
+        });
+      });
+      
+      // Update page counter
+      updatePageCounter();
     }
     
-    // Önceki sayfa
-    prevBtn?.addEventListener('click', () => {
-      if (currentPage > 0) {
-        currentPage--;
-        updatePage();
-      }
-    });
+    // Sayfa sayacını güncelle
+    function updatePageCounter() {
+      if (!pageCounter) return;
+      
+      const startIndex = currentPage * itemsPerPage + 1;
+      const endIndex = Math.min((currentPage + 1) * itemsPerPage, filteredProducts.length);
+      pageCounter.textContent = `${startIndex}-${endIndex} / ${filteredProducts.length}`;
+      
+      // Button states
+      if (prevPageBtn) prevPageBtn.disabled = currentPage === 0;
+      if (nextPageBtn) nextPageBtn.disabled = (currentPage + 1) * itemsPerPage >= filteredProducts.length;
+    }
     
-    // Sonraki sayfa
-    nextBtn?.addEventListener('click', () => {
-      if (currentPage < filteredSpreads.length - 1) {
-        currentPage++;
-        updatePage();
+    // Ürün seç
+    function selectProduct(index: number) {
+      activeProductIndex = index;
+      const product = filteredProducts[index];
+      if (!product) return;
+      
+      // Update UI
+      if (mainProductImage) {
+        mainProductImage.src = product.image;
+        mainProductImage.alt = product.title;
       }
-    });
-    
-    // Klavye navigasyonu
-    document.addEventListener('keydown', (e) => {
-      if (zoomModal?.classList.contains('active')) {
-        if (e.key === 'Escape') closeZoom();
-        return;
+      if (productCodeBadge) productCodeBadge.textContent = product.code;
+      if (ageBadge) ageBadge.textContent = product.age;
+      if (productTitle) productTitle.textContent = product.title;
+      
+      // Features
+      if (productFeatures) {
+        productFeatures.innerHTML = product.features.map((feature: string) => `
+          <span class="feature-tag">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            ${feature}
+          </span>
+        `).join('');
       }
       
-      if (e.key === 'ArrowLeft' && currentPage > 0) {
-        currentPage--;
-        updatePage();
-      } else if (e.key === 'ArrowRight' && currentPage < filteredSpreads.length - 1) {
-        currentPage++;
-        updatePage();
+      // Update WhatsApp link
+      const whatsappMsg = lang === 'tr' 
+        ? `Merhaba, ${product.code} ürünü hakkında bilgi almak istiyorum.`
+        : `Hello, I would like information about product ${product.code}.`;
+      if (whatsappButton) {
+        whatsappButton.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMsg)}`;
       }
-    });
-    
-    // Kategori filtreleme
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
-        const category = tab.getAttribute('data-category');
-        
-        if (category === 'all') {
-          filteredSpreads = Array.from(spreads);
-        } else {
-          filteredSpreads = Array.from(spreads).filter(
-            spread => spread.getAttribute('data-category') === category
-          );
-        }
-        
-        currentPage = 0;
-        spreads.forEach(s => s.classList.remove('active'));
-        
-        if (filteredSpreads.length > 0) {
-          updatePage();
-        }
+      
+      // Update zoom image
+      if (zoomImage) {
+        zoomImage.src = product.image;
+        zoomImage.alt = product.title;
+      }
+      
+      // Update active class
+      productList?.querySelectorAll('.product-item').forEach((item) => {
+        const itemIndex = parseInt(item.getAttribute('data-index') || '0');
+        item.classList.toggle('active', itemIndex === index);
       });
-    });
+    }
     
-    // Zoom
-    zoomBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const pageType = btn.getAttribute('data-page');
-        const activeSpread = document.querySelector('.catalog-spread.active');
-        
-        if (activeSpread && zoomContent) {
-          const pageToZoom = pageType === 'left' 
-            ? activeSpread.querySelector('.left-page')
-            : activeSpread.querySelector('.right-page');
-          
-          if (pageToZoom) {
-            zoomContent.innerHTML = '';
-            const clone = pageToZoom.cloneNode(true) as HTMLElement;
-            clone.querySelector('.page-zoom-btn')?.remove();
-            zoomContent.appendChild(clone);
-            zoomModal?.classList.add('active');
-            document.body.style.overflow = 'hidden';
-          }
-        }
-      });
-    });
+    // Zoom modal
+    function openZoom() {
+      zoomModal?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
     
-    // Zoom kapat
     function closeZoom() {
       zoomModal?.classList.remove('active');
       document.body.style.overflow = '';
     }
     
+    // Event Listeners
+    productImageContainer?.addEventListener('click', openZoom);
     zoomCloseBtn?.addEventListener('click', closeZoom);
     zoomOverlay?.addEventListener('click', closeZoom);
     
-    // PDF İndir
-    downloadPdfBtn?.addEventListener('click', () => {
-      alert('PDF indirme özelliği yakında aktif olacak. Şimdilik sayfayı yazdır (Ctrl+P) ile PDF olarak kaydedebilirsiniz.');
+    // ESC tuşu
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeZoom();
+    });
+    
+    // Kategori filtreleme
+    categoryTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        categoryTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const category = tab.getAttribute('data-category');
+        
+        if (category === 'all') {
+          filteredProducts = [...products];
+        } else {
+          filteredProducts = products.filter((p: any) => p.category === category);
+        }
+        
+        currentPage = 0;
+        activeProductIndex = 0;
+        renderProductList();
+        if (filteredProducts.length > 0) {
+          selectProduct(0);
+        }
+      });
+    });
+    
+    // Sayfa navigasyonu
+    prevPageBtn?.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        renderProductList();
+      }
+    });
+    
+    nextPageBtn?.addEventListener('click', () => {
+      if ((currentPage + 1) * itemsPerPage < filteredProducts.length) {
+        currentPage++;
+        renderProductList();
+      }
     });
     
     // İlk yükleme
-    updatePage(false);
+    renderProductList();
+    if (filteredProducts.length > 0) {
+      selectProduct(0);
+    }
   });
 </script>
