@@ -257,7 +257,7 @@ const jsonLd = {
     <section id="hakkimizda" class="section-lg relative overflow-hidden">
       <!-- Gradient Background -->
       <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-pink-900"></div>
-      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+      <div class="absolute inset-0 opacity-50" style={`background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');`}></div>
       
       <div class="container relative z-10">
         <!-- Section Header -->
@@ -461,12 +461,13 @@ const jsonLd = {
 
             <!-- WhatsApp CTA -->
             <div class="pt-4">
-              <WhatsAppButton
-                message="Merhaba, ürünleriniz hakkında bilgi almak istiyorum."
-                size="lg"
-                label="WhatsApp ile Hızlı İletişim"
-                class="w-full justify-center"
-              />
+              <div class="flex justify-center">
+                <WhatsAppButton
+                  message="Merhaba, ürünleriniz hakkında bilgi almak istiyorum."
+                  size="lg"
+                  label="WhatsApp ile Hızlı İletişim"
+                />
+              </div>
             </div>
           </div>
 
@@ -489,7 +490,7 @@ const jsonLd = {
                 Büyük Haritada Aç →
               </a>
             </div>
-            <div class="aspect-square md:aspect-[4/3]">
+            <div class="aspect-video md:aspect-[16/9]">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3009.7834373252627!2d28.88469!3d41.043889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cabb0e77e9e4f7%3A0x4b8e9f5b9b5f5f5f!2sGiyimkent%2C%20Oru%C3%A7reis%2C%2034235%20Esenler%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1703026200000!5m2!1str!2str"
                 width="100%"
