@@ -130,10 +130,11 @@ const InstagramIcon = ({ className }: { className?: string }) => (
 
 // ==================== GOOGLE MAPS ICON ====================
 const GoogleMapsIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
-    <path d="M12 11.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="white"/>
-  </svg>
+  <img
+    src="/mapspin.svg"
+    alt="Google Maps"
+    className={className}
+  />
 );
 
 // ==================== SEARCH DRAWER ====================
@@ -472,15 +473,15 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
     }
   ];
 
-  // Mobile bottom nav items - Yeni sıralama: Ara - WhatsApp - Instagram - Konum - Favoriler
+  // Mobile bottom nav items - Yeni sıralama: Ara (Telefon) - WhatsApp - Instagram - Konum - Favoriler
   const mobileNavItems: NavIconItem[] = [
     {
-      id: 'search',
-      icon: HiMagnifyingGlass,
-      label: lang === 'tr' ? 'Ara' : 'Search',
-      onClick: () => setIsSearchOpen(true),
-      color: 'text-gray-700',
-      hoverColor: 'hover:text-pink-500'
+      id: 'phone',
+      icon: HiPhone,
+      label: lang === 'tr' ? 'Ara' : 'Call',
+      href: phoneUrl,
+      color: 'text-emerald-500',
+      hoverColor: 'hover:text-emerald-600'
     },
     {
       id: 'whatsapp',
