@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiOutlineMagnifyingGlass, HiOutlineHeart, HiHeart, HiOutlineMapPin } from 'react-icons/hi2';
-import { FaInstagram } from 'react-icons/fa';
+import { FaInstagram, FaWhatsapp } from 'react-icons/fa';
 
 interface BottomNavbarProps {
   onSearchClick: () => void;
@@ -17,6 +17,7 @@ export default function BottomNavbar({ onSearchClick, favoritesCount }: BottomNa
   const instagramUrl = 'https://www.instagram.com/yetiscorap/';
   const googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=41.043889,28.88469';
   const favoritesUrl = '/favoriler';
+  const whatsappUrl = 'https://wa.me/905369205969?text=Merhaba%2C%20%C3%BCr%C3%BCnleriniz%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.';
 
   // Scroll event listener
   useEffect(() => {
@@ -53,6 +54,13 @@ export default function BottomNavbar({ onSearchClick, favoritesCount }: BottomNa
         setActiveTab('search');
         onSearchClick();
       }
+    },
+    {
+      id: 'whatsapp',
+      icon: FaWhatsapp,
+      label: 'WhatsApp',
+      href: whatsappUrl,
+      external: true
     },
     {
       id: 'instagram',
@@ -102,7 +110,6 @@ export default function BottomNavbar({ onSearchClick, favoritesCount }: BottomNa
                     className={`flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-colors relative ${
                       isActive ? 'text-pink-500' : 'text-slate-600'
                     }`}
-                    whileTap={{ scale: 0.9 }}
                     onClick={item.onClick}
                   >
                     {/* Badge */}
@@ -117,7 +124,7 @@ export default function BottomNavbar({ onSearchClick, favoritesCount }: BottomNa
                       </motion.span>
                     )}
                     
-                    <Icon className={`w-6 h-6 ${item.id === 'favorites' && favoritesCount > 0 ? 'text-red-500' : ''}`} />
+                    <Icon className={`w-6 h-6 ${item.id === 'favorites' && favoritesCount > 0 ? 'text-red-500' : ''} ${item.id === 'whatsapp' ? 'text-[#25D366]' : ''}`} />
                     <span className="text-[10px] font-medium mt-1">{item.label}</span>
                     
                     {/* Active indicator */}

@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HiOutlineHeart, HiHeart } from 'react-icons/hi2';
+import type { PanInfo } from 'framer-motion';
+import { HiOutlineHeart, HiHeart, HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Ürün tipi
@@ -53,12 +54,12 @@ function useDebounce<T>(value: T, delay: number): T {
 
 // Skeleton Kart Komponenti
 const SkeletonCard = () => (
-  <div className="bg-white rounded-xl overflow-hidden border border-slate-100 animate-pulse">
+  <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden border border-slate-100 animate-pulse">
     <div className="aspect-square bg-slate-200" />
-    <div className="p-3">
-      <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
-      <div className="h-3 bg-slate-200 rounded w-1/2 mb-3" />
-      <div className="h-10 bg-slate-200 rounded mt-2" />
+    <div className="p-2 sm:p-3">
+      <div className="h-3 sm:h-4 bg-slate-200 rounded w-3/4 mb-1.5 sm:mb-2" />
+      <div className="h-2.5 sm:h-3 bg-slate-200 rounded w-1/2 mb-2 sm:mb-3" />
+      <div className="h-8 sm:h-10 bg-slate-200 rounded mt-1 sm:mt-2" />
     </div>
   </div>
 );
@@ -96,7 +97,7 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     if (!isFavorite) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 700);
@@ -118,7 +119,7 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
         },
       });
     }
-    
+
     onToggleFavorite(product);
   };
 
@@ -129,7 +130,7 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="product-card group bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg cursor-pointer relative transition-shadow duration-300"
+      className="product-card group bg-white rounded-lg sm:rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg cursor-pointer relative transition-shadow duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onQuickView(product)}
@@ -149,17 +150,17 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
             (e.target as HTMLImageElement).src = '/images/placeholder.png';
           }}
         />
-        
-        {/* Ürün Kodu Badge */}
-        <div className="absolute top-2 left-2">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-pink-500 text-white shadow-md">
+
+        {/* Ürün Kodu Badge - Daha minimal */}
+        <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
+          <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md sm:rounded-full text-[10px] sm:text-xs font-bold bg-pink-500/90 text-white backdrop-blur-sm">
             {product.code}
           </span>
         </div>
 
-        {/* Favori Butonu */}
+        {/* Favori Butonu - Daha minimal */}
         <motion.button
-          className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md z-10"
+          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10"
           onClick={handleFavoriteClick}
           whileTap={{ scale: 1.3 }}
         >
@@ -168,12 +169,12 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
             transition={{ duration: 0.3 }}
           >
             {isFavorite ? (
-              <HiHeart className="w-5 h-5 text-red-500" />
+              <HiHeart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
             ) : (
-              <HiOutlineHeart className="w-5 h-5 text-slate-400" />
+              <HiOutlineHeart className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
             )}
           </motion.div>
-          
+
           {/* Confetti efekti */}
           {showConfetti && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -184,28 +185,29 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
           )}
         </motion.button>
       </div>
-      
-      {/* Ürün Bilgileri */}
-      <div className="p-3">
-        <h3 className="font-semibold text-slate-800 text-sm leading-tight mb-1 line-clamp-2">
+
+      {/* Ürün Bilgileri - Mobil için optimize */}
+      <div className="p-2 sm:p-3">
+        <h3 className="font-semibold text-slate-800 text-xs sm:text-sm leading-tight mb-0.5 sm:mb-1 line-clamp-1 sm:line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-xs text-slate-500 mb-3">{product.ageRange}</p>
-        
-        {/* Soru Sor Butonu */}
+        <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">{product.ageRange}</p>
+
+        {/* Soru Sor Butonu - Mobil için kompakt */}
         <motion.a
           href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Merhaba, ${product.code} kodlu ürün hakkında bilgi almak istiyorum.`)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-2.5 bg-green-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 relative overflow-hidden"
+          className="w-full py-2 sm:py-2.5 bg-green-500 text-white text-[10px] sm:text-xs font-semibold rounded-md sm:rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 relative overflow-hidden"
           onClick={(e) => e.stopPropagation()}
           whileHover={{ backgroundColor: '#16a34a' }}
           whileTap={{ scale: 0.95 }}
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
-          Soru Sor
+          <span className="hidden sm:inline">Soru Sor</span>
+          <span className="sm:hidden">Sor</span>
         </motion.a>
       </div>
     </motion.article>
@@ -215,13 +217,76 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
 // Quick View Modal
 interface QuickViewModalProps {
   product: Product | null;
+  products: Product[];
   onClose: () => void;
+  onNavigate: (product: Product) => void;
   isFavorite: boolean;
   onToggleFavorite: (product: Product) => void;
 }
 
-const QuickViewModal = ({ product, onClose, isFavorite, onToggleFavorite }: QuickViewModalProps) => {
+const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, onToggleFavorite }: QuickViewModalProps) => {
+  const [direction, setDirection] = useState(0);
+  const [imageKey, setImageKey] = useState(0);
+
   if (!product) return null;
+
+  // Mevcut ürünün index'ini bul
+  const currentIndex = products.findIndex(p => p.id === product.id);
+
+  // Önceki ürüne git (infinite loop)
+  const handlePrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setDirection(-1);
+    const prevIndex = currentIndex <= 0 ? products.length - 1 : currentIndex - 1;
+    setImageKey(prev => prev + 1);
+    onNavigate(products[prevIndex]);
+  };
+
+  // Sonraki ürüne git (infinite loop)
+  const handleNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setDirection(1);
+    const nextIndex = currentIndex >= products.length - 1 ? 0 : currentIndex + 1;
+    setImageKey(prev => prev + 1);
+    onNavigate(products[nextIndex]);
+  };
+
+  // Swipe handler
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const swipeThreshold = 50;
+    if (info.offset.x > swipeThreshold) {
+      handlePrev();
+    } else if (info.offset.x < -swipeThreshold) {
+      handleNext();
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, products]);
+
+  // Image animation variants
+  const imageVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 100 : -100,
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (dir: number) => ({
+      x: dir < 0 ? 100 : -100,
+      opacity: 0
+    })
+  };
 
   return (
     <motion.div
@@ -238,7 +303,7 @@ const QuickViewModal = ({ product, onClose, isFavorite, onToggleFavorite }: Quic
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       />
-      
+
       {/* Modal Content */}
       <motion.div
         className="relative bg-white rounded-2xl overflow-hidden max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl"
@@ -247,50 +312,111 @@ const QuickViewModal = ({ product, onClose, isFavorite, onToggleFavorite }: Quic
         exit={{ scale: 0.9, y: 50 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
+        {/* Close Button - Sağ üstte, z-index yüksek */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md z-10 hover:bg-white transition-colors"
+          className="absolute top-3 right-3 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-30 hover:bg-black/60 transition-colors"
         >
-          <svg className="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
 
-        {/* Favorite Button */}
+        {/* Favorite Button - Sol üstte */}
         <button
           onClick={() => onToggleFavorite(product)}
-          className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md z-10 hover:bg-white transition-colors"
+          className="absolute top-3 left-3 w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-30 hover:bg-black/60 transition-colors"
         >
           {isFavorite ? (
             <HiHeart className="w-5 h-5 text-red-500" />
           ) : (
-            <HiOutlineHeart className="w-5 h-5 text-slate-600" />
+            <HiOutlineHeart className="w-5 h-5 text-white" />
           )}
         </button>
 
-        {/* Product Image */}
-        <div className="relative aspect-square bg-slate-100">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/placeholder.png';
-            }}
-          />
-          <div className="absolute bottom-4 left-4">
+        {/* Product Image with Navigation */}
+        <div className="relative aspect-square bg-slate-100 overflow-hidden">
+          {/* Swipeable Image */}
+          <motion.div
+            className="w-full h-full"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+          >
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.img
+                key={imageKey}
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                custom={direction}
+                variants={imageVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                }}
+                draggable={false}
+              />
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Navigation Arrows - Görselin ortasında */}
+          {products.length > 1 && (
+            <>
+              {/* Prev Button */}
+              <motion.button
+                onClick={handlePrev}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <HiChevronLeft className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
+              </motion.button>
+
+              {/* Next Button */}
+              <motion.button
+                onClick={handleNext}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <HiChevronRight className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
+              </motion.button>
+            </>
+          )}
+
+          {/* Product Code Badge */}
+          <div className="absolute bottom-4 left-4 z-10">
             <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-pink-500 text-white shadow-md">
               {product.code}
             </span>
           </div>
+
+          {/* Page Indicator */}
+          {products.length > 1 && (
+            <div className="absolute bottom-4 right-4 z-10">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/50 text-white backdrop-blur-sm">
+                {currentIndex + 1} / {products.length}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Product Details */}
-        <div className="p-6">
+        <motion.div
+          className="p-6"
+          key={product.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+        >
           <h2 className="text-xl font-bold text-slate-800 mb-2">{product.name}</h2>
           <p className="text-sm text-slate-500 mb-4">{product.ageRange}</p>
-          
+
           {product.description && (
             <p className="text-slate-600 text-sm mb-4">{product.description}</p>
           )}
@@ -337,7 +463,7 @@ const QuickViewModal = ({ product, onClose, isFavorite, onToggleFavorite }: Quic
             </svg>
             WhatsApp'tan Sor
           </motion.a>
-        </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -535,7 +661,12 @@ export default function CatalogSection() {
     }
 
     return result;
-  }, [activeCategories, debouncedSearchQuery]);
+  }, [products, activeCategories, debouncedSearchQuery]);
+
+  // Ana sayfada gösterilecek ürünler (ilk 6)
+  const displayedProducts = useMemo(() => {
+    return filteredProducts.slice(0, 6);
+  }, [filteredProducts]);
 
   // Favori toggle
   const toggleFavorite = (product: Product) => {
@@ -649,32 +780,32 @@ export default function CatalogSection() {
             </p>
           </motion.div>
 
-          {/* Ürün Grid - Mobilde 1, Tablette 2, Masaüstünde 3-4 kolon */}
+          {/* Ürün Grid - Mobilde 2, Tablette 3, Masaüstünde 4 kolon */}
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
                 key="skeleton"
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                {[...Array(8)].map((_, i) => (
+                {[...Array(6)].map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
               </motion.div>
-            ) : filteredProducts.length === 0 ? (
+            ) : displayedProducts.length === 0 ? (
               <EmptyState key="empty" />
             ) : (
               <motion.div
                 key="products"
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
                 <AnimatePresence>
-                  {filteredProducts.map((product, index) => (
+                  {displayedProducts.map((product, index) => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -689,25 +820,28 @@ export default function CatalogSection() {
             )}
           </AnimatePresence>
 
-          {/* Tüm Ürünleri Gör Butonu */}
-          <motion.div 
-            className="text-center mt-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <motion.a
-              href="/urunler"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-slate-800 text-white text-lg font-semibold rounded-full shadow-lg"
-              whileHover={{ scale: 1.02, backgroundColor: '#1e293b' }}
-              whileTap={{ scale: 0.98 }}
+          {/* Tüm Kataloğu İncele Butonu */}
+          {filteredProducts.length > 6 && (
+            <motion.div
+              className="text-center mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
             >
-              <span>Tüm Ürünleri Gör</span>
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </motion.a>
-          </motion.div>
+              <motion.a
+                href="/urunler"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-white text-pink-500 text-lg font-semibold rounded-full border-2 border-pink-500 shadow-md hover:bg-pink-50 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span>Tüm Kataloğu İncele</span>
+                <span className="text-sm text-pink-400">({filteredProducts.length} ürün)</span>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </motion.a>
+            </motion.div>
+          )}
         </div>
 
         {/* Quick View Modal */}
@@ -715,7 +849,9 @@ export default function CatalogSection() {
           {selectedProduct && (
             <QuickViewModal
               product={selectedProduct}
+              products={filteredProducts}
               onClose={() => setSelectedProduct(null)}
+              onNavigate={setSelectedProduct}
               isFavorite={isFavorite(selectedProduct.id)}
               onToggleFavorite={toggleFavorite}
             />

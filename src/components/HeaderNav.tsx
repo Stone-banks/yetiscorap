@@ -238,10 +238,6 @@ const MobileDrawer = ({
   currentPath: string;
   lang: 'tr' | 'en';
 }) => {
-  const whatsappMsg = lang === 'tr'
-    ? encodeURIComponent('Merhaba, ürünleriniz hakkında bilgi almak istiyorum.')
-    : encodeURIComponent('Hello, I would like to get information about your products.');
-
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -288,102 +284,35 @@ const MobileDrawer = ({
           >
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                <img
-                  src="/yetiscoraplogo.png"
-                  alt="Yetiş Çorap"
-                  className="h-10 w-auto object-contain"
-                />
+              <div className="flex items-center justify-end p-4">
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="p-3 rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  <HiXMark className="w-5 h-5 text-gray-600" />
+                  <HiXMark className="w-6 h-6 text-black" />
                 </button>
               </div>
 
-              {/* Navigation */}
-              <nav className="flex-1 overflow-y-auto py-4 px-3">
-                <ul className="space-y-1">
+              {/* Navigation - Sadece 3 Menü */}
+              <nav className="flex-1 overflow-y-auto py-8 px-6">
+                <ul className="space-y-4">
                   {menuItems.map((item) => (
                     <li key={item.href}>
                       <a
                         href={item.href}
-                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 ${
+                        className={`block px-6 py-8 text-3xl font-bold transition-all duration-200 border-b ${
                           isActive(item.href)
-                            ? 'text-pink-600 bg-pink-50'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'text-[#EC4899] border-[#EC4899]/20'
+                            : 'text-black hover:text-[#EC4899] border-gray-200'
                         }`}
                         onClick={onClose}
                       >
-                        {isActive(item.href) && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-pink-500" />
-                        )}
                         {item.label}
                       </a>
                     </li>
                   ))}
                 </ul>
-
-                {/* Search */}
-                <div className="mt-6 px-4">
-                  <a
-                    href={lang === 'tr' ? '/urunler' : '/en/products'}
-                    className="flex items-center gap-3 w-full px-4 py-3 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200 transition-colors"
-                  >
-                    <HiMagnifyingGlass className="w-5 h-5" />
-                    <span>{lang === 'tr' ? 'Ürün Ara' : 'Search Products'}</span>
-                  </a>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="mt-6 px-4 space-y-3">
-                  <a
-                    href={`https://wa.me/905369205969?text=${whatsappMsg}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-3 w-full h-12 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors"
-                    onClick={onClose}
-                  >
-                    <FaWhatsapp className="w-5 h-5" />
-                    <span>{lang === 'tr' ? 'WhatsApp ile İletişim' : 'Contact via WhatsApp'}</span>
-                  </a>
-
-                  <a
-                    href="tel:+905369205969"
-                    className="flex items-center justify-center gap-3 w-full h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors"
-                    onClick={onClose}
-                  >
-                    <HiPhone className="w-5 h-5" />
-                    <span>{lang === 'tr' ? 'Hemen Ara' : 'Call Now'}</span>
-                  </a>
-                </div>
               </nav>
-
-              {/* Footer */}
-              <div className="p-4 border-t border-gray-100 bg-gray-50">
-                <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">
-                  {lang === 'tr' ? 'Dil Seçimi' : 'Language'}
-                </p>
-                <div className="flex gap-2">
-                  <a
-                    href="/"
-                    className={`flex-1 py-2 text-center rounded-lg text-sm font-medium transition-colors ${
-                      lang === 'tr' ? 'bg-pink-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    Türkçe
-                  </a>
-                  <a
-                    href="/en"
-                    className={`flex-1 py-2 text-center rounded-lg text-sm font-medium transition-colors ${
-                      lang === 'en' ? 'bg-pink-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    English
-                  </a>
-                </div>
-              </div>
             </div>
           </motion.aside>
         </>
@@ -680,15 +609,57 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
             />
           </a>
 
-          {/* Hamburger Button */}
-          <button
-            type="button"
-            onClick={() => setIsDrawerOpen(true)}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-            aria-label={lang === 'tr' ? 'Menüyü aç' : 'Open menu'}
-          >
-            <HiBars3 className="w-6 h-6 text-gray-700" />
-          </button>
+          {/* Sağ taraf: Dil Seçimi + Hamburger */}
+          <div className="flex items-center gap-2">
+            {/* Dil Seçimi - Bayrak İkonları */}
+            <div className="flex items-center gap-1">
+              <a
+                href="/"
+                className={`w-8 h-6 overflow-hidden border transition-all ${
+                  lang === 'tr'
+                    ? 'border-pink-500 shadow-sm'
+                    : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
+                title="Türkçe"
+              >
+                {/* Türk Bayrağı */}
+                <svg viewBox="0 0 32 24" className="w-full h-full">
+                  <rect width="32" height="24" fill="#E30A17"/>
+                  <circle cx="13" cy="12" r="4.5" fill="white"/>
+                  <circle cx="14.5" cy="12" r="3.6" fill="#E30A17"/>
+                  <polygon points="19,12 16.5,13.5 17,11.5 15,10 18,10" fill="white"/>
+                </svg>
+              </a>
+              <a
+                href="/en"
+                className={`w-8 h-6 overflow-hidden border transition-all ${
+                  lang === 'en'
+                    ? 'border-pink-500 shadow-sm'
+                    : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
+                title="English"
+              >
+                {/* İngiliz Bayrağı */}
+                <svg viewBox="0 0 32 24" className="w-full h-full">
+                  <rect width="32" height="24" fill="#012169"/>
+                  <path d="M0,0 L32,24 M32,0 L0,24" stroke="white" strokeWidth="4"/>
+                  <path d="M0,0 L32,24 M32,0 L0,24" stroke="#C8102E" strokeWidth="2.5"/>
+                  <path d="M16,0 V24 M0,12 H32" stroke="white" strokeWidth="6"/>
+                  <path d="M16,0 V24 M0,12 H32" stroke="#C8102E" strokeWidth="4"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* Hamburger Button */}
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label={lang === 'tr' ? 'Menüyü aç' : 'Open menu'}
+            >
+              <HiBars3 className="w-6 h-6 text-gray-700" />
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -725,13 +696,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
                     whileHover={{ scale: 1.1 }}
                   >
                     {/* Special styling for WhatsApp */}
-                    {item.id === 'whatsapp' ? (
-                      <div className="w-6 h-6 relative">
-                        <FaWhatsapp className="w-full h-full" />
-                        {/* Pulse animation for WhatsApp */}
-                        <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
-                      </div>
-                    ) : /* Special gradient for Instagram */ item.id === 'instagram' ? (
+                    {item.id === 'instagram' ? (
                       <div className="w-6 h-6">
                         <SiInstagram
                           className="w-full h-full"

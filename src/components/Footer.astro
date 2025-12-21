@@ -213,16 +213,17 @@ const currentYear = new Date().getFullYear();
   <!-- Bottom Bar -->
   <div class="border-t border-slate-800">
     <div class="container py-6">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+      <div class="flex flex-col items-center justify-center gap-2 text-sm text-slate-500">
         <p>
           &copy; {currentYear} <span class="text-pink-400 font-medium">{t.company}</span>. {t.copyright}
         </p>
-        <p class="flex items-center gap-1">
-          {t.madeWith}
-          <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
-          </svg>
-          İstanbul, Türkiye
+        <p class="text-xs text-slate-600">
+          Geliştirici: <a
+            href="https://www.instagram.com/talyadrone"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-pink-400 transition-colors"
+          >TalyaDrone</a>
         </p>
       </div>
     </div>

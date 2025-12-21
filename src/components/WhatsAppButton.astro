@@ -121,27 +121,15 @@ const iconSizes = {
     box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
     /* Animasyon */
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    /* Pulse animasyonu */
-    animation: fab-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   .whatsapp-fab:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5), 0 4px 8px rgba(0, 0, 0, 0.15);
-    animation: none;
   }
 
   .whatsapp-fab:active {
     transform: scale(1.05);
-  }
-
-  @keyframes fab-pulse {
-    0%, 100% {
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    50% {
-      box-shadow: 0 4px 20px rgba(37, 211, 102, 0.6), 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
   }
 
   /* Mobil için daha büyük touch target */
