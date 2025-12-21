@@ -76,13 +76,13 @@ const iconSizes = {
     <span>{label || 'WhatsApp ile Sipariş Ver'}</span>
   </a>
 ) : (
-  <!-- FAB (Floating Action Button) Görünümü -->
+  <!-- FAB (Floating Action Button) Görünümü - Sadece Masaüstünde Görünür -->
   <a
     id="whatsapp-fab"
     href={whatsappURL}
     target="_blank"
     rel="noopener noreferrer"
-    class="whatsapp-fab no-print"
+    class="whatsapp-fab no-print hidden md:flex"
     aria-label="WhatsApp ile iletişime geç"
     title="WhatsApp ile iletişime geç"
   >

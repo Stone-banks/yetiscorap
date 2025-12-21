@@ -642,10 +642,10 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
 
           {/* Sağ taraf: İletişim + Dil Seçimi + Hamburger */}
           <div className="flex items-center gap-3">
-            {/* İletişim Linki */}
+            {/* İletişim Butonu */}
             <a
               href={lang === 'tr' ? '/iletisim' : '/en/contact'}
-              className="text-xs font-medium text-slate-600 hover:text-pink-500 transition-colors"
+              className="px-3 py-1.5 text-[11px] font-medium text-pink-500 border border-pink-400 rounded-full hover:bg-pink-500 hover:text-white transition-all duration-200"
             >
               {lang === 'tr' ? 'İletişim' : 'Contact'}
             </a>
