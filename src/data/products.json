@@ -1,0 +1,65 @@
+{
+  "whatsappNumber": "905369205969",
+  "products": [
+    {
+      "id": 1,
+      "code": "YC-001",
+      "name": "Dantelli Kız Çocuk Çorabı",
+      "category": "cocuk",
+      "ageRange": "3-5 Yaş",
+      "material": "%100 Pamuk",
+      "description": "Zarif dantel detaylı, şık ve rahat çocuk çorabı",
+      "image": "/images/products/product-1.jpg"
+    },
+    {
+      "id": 2,
+      "code": "YC-002",
+      "name": "Fırfırlı Bebek Çorabı",
+      "category": "bebek",
+      "ageRange": "0-6 Ay",
+      "material": "%100 Pamuk",
+      "description": "Yumuşak ve rahat, fırfırlı bebek çorabı",
+      "image": "/images/products/product-2.jpg"
+    },
+    {
+      "id": 3,
+      "code": "YC-003",
+      "name": "Kaymaz Tabanlı Bebek Çorabı",
+      "category": "bebek",
+      "ageRange": "6-12 Ay",
+      "material": "%95 Pamuk, %5 Elastan",
+      "description": "Silikon kaymaz tabanlı, güvenli bebek çorabı",
+      "image": "/images/products/product-3.jpg"
+    },
+    {
+      "id": 4,
+      "code": "YC-004",
+      "name": "Desenli Erkek Çocuk Çorabı",
+      "category": "cocuk",
+      "ageRange": "4-6 Yaş",
+      "material": "%100 Pamuk",
+      "description": "Eğlenceli desenli, rahat erkek çocuk çorabı",
+      "image": "/images/products/product-4.jpg"
+    },
+    {
+      "id": 5,
+      "code": "YC-005",
+      "name": "Yenidoğan Patik Çorabı",
+      "category": "bebek",
+      "ageRange": "0-3 Ay",
+      "material": "%100 Organik Pamuk",
+      "description": "Hassas bebek cildine uygun, yumuşak patik çorap",
+      "image": "/images/products/product-5.jpg"
+    },
+    {
+      "id": 6,
+      "code": "YC-006",
+      "name": "Okul Çorabı Seti",
+      "category": "cocuk",
+      "ageRange": "6-10 Yaş",
+      "material": "%100 Pamuk",
+      "description": "Günlük kullanım için ideal okul çorabı seti",
+      "image": "/images/products/product-6.jpg"
+    }
+  ]
+}

@@ -1,32 +1,31 @@
 ---
 /**
  * TR Anasayfa (index.astro)
- * Yetiş Çorap - Kurumsal Ana Sayfa
+ * Yetiş Çorap - Toptan Bebek ve Çocuk Çorabı
  *
  * BÖLÜMLER:
- * 1. Hero - Logo büyük, arkaplan contain, min-h-85vh
- * 2. Üretim ve İhracat Gücümüz - Sayaçlar/infografik
- * 3. Dijital Ürün Kataloğu - Arama, filtre, interactive spread
- * 4. Hakkımızda - Profesyonel grid
- * 5. İletişim - Card tasarım, harita
- * 6. Instagram - Basit takip butonu
+ * 1. Hero - Dikey görsel arka plan, 2x logo
+ * 2. Ürün Kataloğu - Modern grid, kompakt kartlar
+ * 3. Hakkımızda - Gradient arkaplan
+ * 4. İletişim - Icon'lu kartlar ve harita
  */
 
 import BaseLayout from '@layouts/BaseLayout.astro';
-import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import WhatsAppButton from '@components/WhatsAppButton.astro';
-import CatalogGrid from '@components/CatalogGrid.astro';
+import CatalogSection from '@components/CatalogSection.tsx';
+import HeaderNav from '@components/HeaderNav.tsx';
 
 // JSON-LD yapısal veri
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WholesaleStore',
   'name': 'Yetiş Çorap',
-  'description': 'İstanbul Giyimkent\'te toptan bebek ve çocuk çorabı üretimi ve satışı. 20+ yıl deneyim, kaliteli ürünler.',
+  'description': 'İstanbul Giyimkent\'te 2017\'den beri toptan bebek ve çocuk çorabı üretimi.',
   'url': 'https://yetiscorap.com',
   'telephone': '+905369205969',
   'email': 'yetiscorap@hotmail.com',
+  'foundingDate': '2017',
   'address': {
     '@type': 'PostalAddress',
     'streetAddress': 'Oruçreis Mah. Giyimkent 4. Sokak No:50',
@@ -37,7 +36,7 @@ const jsonLd = {
   },
   'openingHoursSpecification': {
     '@type': 'OpeningHoursSpecification',
-    'dayOfWeek': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    'dayOfWeek': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     'opens': '09:00',
     'closes': '18:00'
   }
@@ -45,45 +44,32 @@ const jsonLd = {
 ---
 
 <BaseLayout
-  title="Ana Sayfa"
-  description="Yetiş Çorap - İstanbul Giyimkent'te 20+ yıllık deneyimle toptan bebek ve çocuk çorabı üretimi. Kaliteli, uygun fiyatlı, güvenilir tedarikçiniz."
+  title="Toptan Bebek & Çocuk Çorapları"
+  description="Yetiş Çorap - İstanbul Giyimkent'te 2017'den beri kaliteli, cilt dostu bebek ve çocuk çorabı üretiyoruz."
   lang="tr"
   jsonLd={jsonLd}
 >
-  <Header lang="tr" />
+  <HeaderNav lang="tr" currentPath="/" client:load />
 
   <main>
     <!-- ==================== HERO SECTION ==================== -->
-    <section class="hero-section relative min-h-[100vh] md:min-h-[90vh] flex items-center overflow-hidden">
-      <!-- Background Image - Mobilde tam görünecek şekilde -->
-      <div class="hero-bg absolute inset-0 z-0">
-        <!-- Mobil: Dikey Hero - Tam görünür, object-fit cover -->
+    <section class="hero-section relative min-h-screen md:min-h-[90vh] flex items-center overflow-hidden">
+      <!-- Arka Plan Görseli - Mobilde tam görünsün -->
+      <div class="absolute inset-0">
         <img
           src="/dikeyhero.png"
-          alt=""
-          class="hero-img-mobile md:hidden w-full h-full object-cover object-center"
+          alt="Bebek ve Çocuk Çorapları"
+          class="w-full h-full object-cover object-center"
           loading="eager"
-          fetchpriority="high"
-          aria-hidden="true"
         />
-        <!-- Desktop: Yatay Hero -->
-        <img
-          src="/yatayhero.png"
-          alt=""
-          class="hero-img-desktop hidden md:block w-full h-full object-cover object-center"
-          loading="eager"
-          fetchpriority="high"
-          aria-hidden="true"
-        />
-        <!-- Overlay Gradient -->
-        <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/40 md:from-white/90 md:via-white/70 md:to-transparent"></div>
+        <!-- Overlay gradient -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent md:from-white/90 md:via-white/60 md:to-transparent"></div>
       </div>
 
-      <!-- Hero Content -->
       <div class="container relative z-10">
-        <div class="max-w-2xl py-12 md:py-16 lg:py-20">
-          <!-- Logo - 2x büyütülmüş -->
-          <div class="mb-6 md:mb-8">
+        <div class="max-w-xl py-16 md:py-20">
+          <!-- Logo - 2x boyut -->
+          <div class="mb-8 md:mb-10">
             <img
               src="/yetiscoraplogo.png"
               alt="Yetiş Çorap Logo"
@@ -93,78 +79,50 @@ const jsonLd = {
             />
           </div>
 
-          <!-- Heading -->
-          <h1 class="heading-display mb-4 md:mb-6">
-            Kaliteli Bebek ve Çocuk Çorapları
-            <span class="block text-pink-500 mt-1">Toptan Satış</span>
+          <!-- H1 Başlık -->
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-800 leading-tight mb-6">
+            Çocuklar ve Bebekler İçin
+            <span class="block text-pink-600 mt-2">Kaliteli Çorap</span>
           </h1>
 
-          <!-- Subheading -->
-          <p class="text-body-lg text-slate-600 mb-6 md:mb-8 max-w-xl">
-            İstanbul Giyimkent'te <strong class="text-slate-800">20+ yıllık deneyim</strong> ile 
-            güvenilir çorap tedarikçiniz. Yüksek kalite, uygun fiyat, hızlı teslimat.
+          <!-- Alt Açıklama -->
+          <p class="text-lg md:text-xl text-slate-600 mb-8 leading-relaxed">
+            2017'den beri kaliteli, cilt dostu çoraplar üretiyoruz.
+            <span class="block mt-2 text-slate-500">İstanbul / Giyimkent</span>
           </p>
 
-          <!-- CTA Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 md:mb-12">
-            <WhatsAppButton
-              message="Merhaba, toptan çorap fiyatları hakkında bilgi almak istiyorum."
-              size="lg"
-              label="WhatsApp ile İletişim"
-            />
+          <!-- CTA Butonları -->
+          <div class="flex flex-col sm:flex-row gap-4">
+            <!-- İncele Butonu (Pembe) -->
             <a
-              href="#katalog"
-              class="btn btn-outline btn-lg group"
+              href="#urunler"
+              class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-pink-600 hover:bg-pink-700 text-white text-lg font-semibold rounded-full transition-all duration-300 shadow-lg shadow-pink-500/30 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-0.5"
             >
-              <span>Ürünleri İncele</span>
-              <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
+              <span>Ürünleri İncele</span>
             </a>
-          </div>
 
-          <!-- Quick Stats -->
-          <div class="flex flex-wrap gap-6 md:gap-10">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center">
-                <svg class="w-6 h-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <div class="text-2xl font-bold text-slate-900">20+</div>
-                <div class="text-sm text-slate-500">Yıl Deneyim</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg class="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <div>
-                <div class="text-2xl font-bold text-slate-900">100+</div>
-                <div class="text-sm text-slate-500">Ürün Çeşidi</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-              </div>
-              <div>
-                <div class="text-2xl font-bold text-slate-900">7/24</div>
-                <div class="text-sm text-slate-500">Destek</div>
-              </div>
-            </div>
+            <!-- WhatsApp Butonu -->
+            <a
+              href="https://wa.me/905369205969?text=Merhaba%2C%20%C3%BCr%C3%BCnleriniz%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum."
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white text-lg font-semibold rounded-full transition-all duration-300 shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 hover:-translate-y-0.5"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              <span>İletişim</span>
+            </a>
           </div>
         </div>
       </div>
 
       <!-- Scroll Indicator -->
-      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:block animate-bounce">
-        <a href="#uretim" class="flex flex-col items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors">
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+        <a href="#urunler" class="flex flex-col items-center gap-2 text-slate-500 hover:text-pink-500 transition-colors">
           <span class="text-xs font-medium">Aşağı Kaydır</span>
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -173,178 +131,69 @@ const jsonLd = {
       </div>
     </section>
 
-    <!-- ==================== ÜRETİM VE İHRACAT GÜCÜMÜZ ==================== -->
-    <section id="uretim" class="section bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+    <!-- ==================== ÜRÜN KATALOĞU (React + Framer Motion) ==================== -->
+    <CatalogSection client:load />
+
+    <!-- ==================== HAKKIMIZDA BÖLÜMÜ ==================== -->
+    <section id="hakkimizda" class="py-16 md:py-24 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800">
       <div class="container">
         <!-- Section Header -->
         <div class="text-center mb-12 md:mb-16">
-          <span class="inline-block px-4 py-1.5 rounded-full bg-pink-500/20 text-pink-300 text-sm font-medium mb-4">
-            Kurumsal Güç
-          </span>
-          <h2 class="heading-xl !text-white mb-4">
-            Üretim ve İhracat Gücümüz
-          </h2>
-          <p class="text-slate-300 text-lg max-w-2xl mx-auto">
-            İstanbul'un kalbinde, Giyimkent'te 20 yılı aşkın tecrübemizle Türkiye'nin ve dünyanın dört bir yanına kaliteli çorap üretiyoruz.
-          </p>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          <!-- Stat 1 -->
-          <div class="stat-card bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-pink-500/50 transition-colors">
-            <div class="text-4xl md:text-5xl font-bold text-pink-400 mb-2">20+</div>
-            <div class="text-slate-300 font-medium">Yıllık Deneyim</div>
-            <p class="text-slate-400 text-sm mt-2">2000'den beri sektörde</p>
-          </div>
-
-          <!-- Stat 2 -->
-          <div class="stat-card bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-blue-500/50 transition-colors">
-            <div class="text-4xl md:text-5xl font-bold text-blue-400 mb-2">50K+</div>
-            <div class="text-slate-300 font-medium">Aylık Üretim</div>
-            <p class="text-slate-400 text-sm mt-2">Düzine kapasitesi</p>
-          </div>
-
-          <!-- Stat 3 -->
-          <div class="stat-card bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-green-500/50 transition-colors">
-            <div class="text-4xl md:text-5xl font-bold text-green-400 mb-2">15+</div>
-            <div class="text-slate-300 font-medium">İhracat Ülkesi</div>
-            <p class="text-slate-400 text-sm mt-2">Global erişim</p>
-          </div>
-
-          <!-- Stat 4 -->
-          <div class="stat-card bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:border-amber-500/50 transition-colors">
-            <div class="text-4xl md:text-5xl font-bold text-amber-400 mb-2">500+</div>
-            <div class="text-slate-300 font-medium">Mutlu Müşteri</div>
-            <p class="text-slate-400 text-sm mt-2">Güvenilir iş ortaklığı</p>
-          </div>
-        </div>
-
-        <!-- Trust Badges -->
-        <div class="flex flex-wrap justify-center items-center gap-6 md:gap-10 mt-12 md:mt-16 pt-8 border-t border-white/10">
-          <div class="flex items-center gap-2 text-slate-400">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            <span>%100 Pamuklu</span>
-          </div>
-          <div class="flex items-center gap-2 text-slate-400">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            <span>Bebek Güvenli</span>
-          </div>
-          <div class="flex items-center gap-2 text-slate-400">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            <span>Hızlı Teslimat</span>
-          </div>
-          <div class="flex items-center gap-2 text-slate-400">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            <span>Toptan Fiyat</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== ÜRÜN KATALOĞU ==================== -->
-    <CatalogGrid lang="tr" />
-
-    <!-- ==================== HAKKIMIZDA ==================== -->
-    <section id="hakkimizda" class="section-lg relative overflow-hidden">
-      <!-- Gradient Background -->
-      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-pink-900"></div>
-      <div class="absolute inset-0 opacity-50" style={`background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');`}></div>
-      
-      <div class="container relative z-10">
-        <!-- Section Header -->
-        <div class="text-center mb-12 md:mb-16">
-          <span class="inline-block px-4 py-2 rounded-full bg-pink-500/20 text-pink-300 text-sm font-semibold mb-4 backdrop-blur-sm border border-pink-500/30">
-            Bizi Tanıyın
-          </span>
-          <h2 class="heading-xl !text-white mb-4">
-            Yetiş Çorap Hakkında
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Hakkımızda
           </h2>
           <p class="text-lg text-slate-300 max-w-2xl mx-auto">
-            20 yılı aşkın deneyimimizle kaliteli çorap üretimi ve toptan satışında güvenilir adresiniz
+            Yetiş Çorap olarak kaliteli çorap üretimi konusunda sizlere hizmet veriyoruz
           </p>
         </div>
 
-        <!-- About Card -->
-        <div class="max-w-4xl mx-auto">
-          <div class="bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-8 md:p-12 shadow-2xl">
-            <div class="grid md:grid-cols-2 gap-8 items-center">
-              <!-- Logo Side -->
-              <div class="text-center md:text-left">
-                <div class="inline-block p-6 bg-white rounded-2xl shadow-xl mb-6">
-                  <img
-                    src="/yetiscoraplogo.png"
-                    alt="Yetiş Çorap"
-                    class="h-24 md:h-32 w-auto"
-                    loading="lazy"
-                  />
-                </div>
-                <p class="text-3xl font-bold text-white mb-2">Yetiş Çorap</p>
-                <p class="text-pink-300 font-medium">2000'den beri güvenle</p>
+        <!-- 3 Sütunlu Modern Kartlar -->
+        <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+          <!-- Kart 1: Deneyim -->
+          <div class="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative z-10">
+              <div class="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6">
+                <svg class="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              
-              <!-- Text Side -->
-              <div>
-                <h3 class="text-xl font-bold text-white mb-4">Neden Yetiş Çorap?</h3>
-                <div class="space-y-3 text-slate-300">
-                  <p>
-                    <strong class="text-white">Yetiş Çorap</strong>, 2000 yılından bu yana İstanbul Giyimkent'te
-                    bebek ve çocuk çorabı üretimi ve toptan satışı konusunda hizmet vermektedir.
-                  </p>
-                  <p>
-                    Kaliteli üretim, uygun fiyatlar ve müşteri memnuniyeti odaklı çalışma prensiplerimizle
-                    sektörde güvenilir bir tedarikçi konumundayız.
-                  </p>
-                </div>
-              </div>
+              <h3 class="text-xl font-bold text-white mb-3">Deneyim</h3>
+              <p class="text-slate-300 leading-relaxed">
+                2017'den beri çorap üretimine odaklanıyoruz. 8 yıllık tecrübemizle kaliteli ürünler sunuyoruz.
+              </p>
             </div>
+          </div>
 
-            <!-- Features Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 pt-10 border-t border-white/10">
-              <div class="text-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-pink-500/20 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-                <h4 class="font-semibold text-white text-sm">%100 Pamuklu</h4>
-                <p class="text-xs text-slate-400 mt-1">Kaliteli kumaşlar</p>
+          <!-- Kart 2: Kalite -->
+          <div class="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative z-10">
+              <div class="w-16 h-16 rounded-2xl bg-pink-500/20 flex items-center justify-center mb-6">
+                <svg class="w-8 h-8 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
               </div>
-              <div class="text-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <h4 class="font-semibold text-white text-sm">Bebek Güvenli</h4>
-                <p class="text-xs text-slate-400 mt-1">Sağlığa uygun</p>
+              <h3 class="text-xl font-bold text-white mb-3">Kalite</h3>
+              <p class="text-slate-300 leading-relaxed">
+                %100 Pamuk, Cilt Dostu ve Bebeklere Uygun malzemeler kullanıyoruz.
+              </p>
+            </div>
+          </div>
+
+          <!-- Kart 3: Toptan Satış -->
+          <div class="group relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative z-10">
+              <div class="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center mb-6">
+                <svg class="w-8 h-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
               </div>
-              <div class="text-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h4 class="font-semibold text-white text-sm">Hızlı Teslimat</h4>
-                <p class="text-xs text-slate-400 mt-1">Esnek sipariş</p>
-              </div>
-              <div class="text-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h4 class="font-semibold text-white text-sm">Uygun Fiyat</h4>
-                <p class="text-xs text-slate-400 mt-1">Rekabetçi</p>
-              </div>
+              <h3 class="text-xl font-bold text-white mb-3">Toptan Satış</h3>
+              <p class="text-slate-300 leading-relaxed">
+                B2B müşterilerimiz için toptan satış seçenekleri sunuyoruz.
+              </p>
             </div>
           </div>
         </div>
@@ -352,162 +201,105 @@ const jsonLd = {
     </section>
 
     <!-- ==================== İLETİŞİM ==================== -->
-    <section id="iletisim" class="section-lg bg-gradient-to-b from-slate-50 to-white">
+    <section id="iletisim" class="py-16 md:py-24 bg-white">
       <div class="container">
         <!-- Section Header -->
         <div class="text-center mb-12 md:mb-16">
-          <span class="inline-block px-4 py-2 rounded-full bg-blue-100 text-blue-600 text-sm font-semibold mb-4">
-            Bize Ulaşın
-          </span>
-          <h2 class="heading-xl mb-4">
-            İletişim Bilgileri
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-4">
+            İletişim
           </h2>
-          <p class="text-body-lg max-w-2xl mx-auto">
-            Siparişleriniz ve sorularınız için bize ulaşın
+          <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+            Toptan satış için bizimle iletişime geçin
           </p>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
-          <!-- Contact Cards -->
-          <div class="space-y-4">
-            <!-- Address Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 hover:shadow-xl transition-shadow group">
-              <div class="flex items-start gap-5">
-                <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <div class="flex-1">
-                  <h3 class="font-bold text-slate-900 text-lg mb-2">Adres</h3>
-                  <p class="text-slate-600 leading-relaxed mb-3">
-                    Oruçreis Mah. Giyimkent 4 Sokak No:50<br />Esenler / İstanbul
-                  </p>
-                  <a
-                    href="https://maps.google.com/?q=Oruçreis+Mah+Giyimkent+4+Sokak+No:50+Esenler+İstanbul"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600 font-semibold"
-                  >
-                    <span>Google Maps'te Aç</span>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                </div>
-              </div>
+        <!-- 4 Kartlı Yapı -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+          <!-- Adres -->
+          <div class="group bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-6 border border-blue-100 hover:shadow-lg hover:shadow-blue-100/50 transition-all duration-300">
+            <div class="w-14 h-14 rounded-xl bg-blue-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
             </div>
-
-            <!-- Phone Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 hover:shadow-xl transition-shadow group">
-              <div class="flex items-start gap-5">
-                <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                </div>
-                <div class="flex-1">
-                  <h3 class="font-bold text-slate-900 text-lg mb-2">Telefon</h3>
-                  <a href="tel:+905369205969" class="text-2xl font-bold text-slate-800 hover:text-pink-500 transition-colors">
-                    0536 920 59 69
-                  </a>
-                  <p class="text-sm text-slate-500 mt-1">Hafta içi 09:00 - 18:00</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Email Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 hover:shadow-xl transition-shadow group">
-              <div class="flex items-start gap-5">
-                <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div class="flex-1">
-                  <h3 class="font-bold text-slate-900 text-lg mb-2">E-Posta</h3>
-                  <a href="mailto:yetiscorap@hotmail.com" class="text-lg font-medium text-slate-700 hover:text-pink-500 transition-colors break-all">
-                    yetiscorap@hotmail.com
-                  </a>
-                  <p class="text-sm text-slate-500 mt-1">7/24 yazabilirsiniz</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Working Hours Card -->
-            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6 hover:shadow-xl transition-shadow group">
-              <div class="flex items-start gap-5">
-                <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div class="flex-1">
-                  <h3 class="font-bold text-slate-900 text-lg mb-2">Çalışma Saatleri</h3>
-                  <div class="space-y-1">
-                    <div class="flex justify-between text-slate-600">
-                      <span>Pazartesi - Cumartesi</span>
-                      <span class="font-semibold">09:00 - 18:00</span>
-                    </div>
-                    <div class="flex justify-between text-slate-400">
-                      <span>Pazar</span>
-                      <span>Kapalı</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- WhatsApp CTA -->
-            <div class="pt-4">
-              <div class="flex justify-center">
-                <WhatsAppButton
-                  message="Merhaba, ürünleriniz hakkında bilgi almak istiyorum."
-                  size="lg"
-                  label="WhatsApp ile Hızlı İletişim"
-                />
-              </div>
-            </div>
+            <h3 class="font-bold text-slate-800 mb-2 text-lg">Adres</h3>
+            <p class="text-slate-600 leading-relaxed">
+              Oruçreis Mah. Giyimkent 4 Sokak No:50<br />Esenler / İstanbul
+            </p>
           </div>
 
-          <!-- Map -->
-          <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden h-fit">
-            <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-              <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Bizi Ziyaret Edin
-              </h3>
-              <a
-                href="https://maps.google.com/?q=Oruçreis+Mah+Giyimkent+4+Sokak+No:50+Esenler+İstanbul"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-sm text-blue-500 hover:text-blue-600 font-medium"
-              >
-                Büyük Haritada Aç →
-              </a>
+          <!-- Telefon -->
+          <div class="group bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl p-6 border border-green-100 hover:shadow-lg hover:shadow-green-100/50 transition-all duration-300">
+            <div class="w-14 h-14 rounded-xl bg-green-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
             </div>
-            <div class="aspect-video md:aspect-[16/9]">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3009.7834373252627!2d28.88469!3d41.043889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cabb0e77e9e4f7%3A0x4b8e9f5b9b5f5f5f!2sGiyimkent%2C%20Oru%C3%A7reis%2C%2034235%20Esenler%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1703026200000!5m2!1str!2str"
-                width="100%"
-                height="100%"
-                style="border:0;"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                title="Yetiş Çorap Konum"
-                class="w-full h-full"
-              ></iframe>
-            </div>
+            <h3 class="font-bold text-slate-800 mb-2 text-lg">Telefon</h3>
+            <a href="tel:+905369205969" class="text-xl font-semibold text-slate-700 hover:text-green-600 transition-colors">
+              0536 920 59 69
+            </a>
+            <p class="text-sm text-slate-500 mt-1">09:00 - 18:00</p>
           </div>
+
+          <!-- E-Posta -->
+          <div class="group bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-2xl p-6 border border-pink-100 hover:shadow-lg hover:shadow-pink-100/50 transition-all duration-300">
+            <div class="w-14 h-14 rounded-xl bg-pink-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 class="font-bold text-slate-800 mb-2 text-lg">E-Posta</h3>
+            <a href="mailto:yetiscorap@hotmail.com" class="text-slate-600 hover:text-pink-600 transition-colors break-all">
+              yetiscorap@hotmail.com
+            </a>
+          </div>
+
+          <!-- Çalışma Saatleri -->
+          <div class="group bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl p-6 border border-amber-100 hover:shadow-lg hover:shadow-amber-100/50 transition-all duration-300">
+            <div class="w-14 h-14 rounded-xl bg-amber-500 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="font-bold text-slate-800 mb-2 text-lg">Çalışma Saatleri</h3>
+            <p class="text-slate-600">Pazartesi - Cuma</p>
+            <p class="text-lg font-semibold text-slate-700">09:00 - 18:00</p>
+          </div>
+        </div>
+
+        <!-- Google Maps -->
+        <div class="bg-gray-100 rounded-2xl overflow-hidden shadow-lg">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3009.7834373252627!2d28.88469!3d41.043889!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cabb0e77e9e4f7%3A0x4b8e9f5b9b5f5f5f!2sGiyimkent%2C%20Oru%C3%A7reis%2C%2034235%20Esenler%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1703026200000!5m2!1str!2str"
+            width="100%"
+            height="350"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Yetiş Çorap - Giyimkent, İstanbul"
+            class="w-full"
+          ></iframe>
+        </div>
+
+        <!-- Yol Tarifi CTA -->
+        <div class="text-center mt-10">
+          <a
+            href="https://www.google.com/maps/dir/?api=1&destination=41.043889,28.88469&destination_place_id=ChIJ9-TpdzS5yhQRX19fu1uf6Es"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-3 px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold rounded-full transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl"
+          >
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            <span>Yol Tarifi Al</span>
+          </a>
         </div>
       </div>
     </section>
-
   </main>
 
   <Footer lang="tr" />
@@ -520,37 +312,20 @@ const jsonLd = {
 </BaseLayout>
 
 <style>
-  /* Hero Section */
-  .hero-section {
-    background: linear-gradient(135deg, #fdf2f8 0%, #fff 50%, #eff6ff 100%);
+  /* Line clamp for text */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   
-  .hero-bg {
-    opacity: 0.95;
+  /* Scrollbar hide for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-  
-  .hero-img-mobile {
-    background: linear-gradient(135deg, #fce7f3 0%, #fff 100%);
-  }
-  
-  /* Stat Card hover effect */
-  .stat-card {
-    transition: all 0.3s ease;
-    padding: 1.5rem;
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-4px);
-  }
-
-  /* Section large padding */
-  .section-lg {
-    padding: 5rem 0;
-  }
-  
-  @media (min-width: 768px) {
-    .section-lg {
-      padding: 6rem 0;
-    }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 </style>

@@ -4,9 +4,9 @@
  */
 
 import BaseLayout from '@layouts/BaseLayout.astro';
-import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import WhatsAppButton from '@components/WhatsAppButton.astro';
+import HeaderNav from '@components/HeaderNav.tsx';
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -44,7 +44,7 @@ const jsonLd = {
   lang="en"
   jsonLd={jsonLd}
 >
-  <Header lang="en" currentPath="/en/contact" />
+  <HeaderNav lang="en" currentPath="/en/contact" client:load />
 
   <main>
     <!-- Page Title -->

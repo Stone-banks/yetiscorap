@@ -1,12 +1,14 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import react from '@astrojs/react';
 
 /**
  * Astro Konfigürasyonu - Yetiş Çorap
  * - Statik site oluşturma (SSG)
  * - i18n desteği: TR (varsayılan, prefix yok), EN (/en)
  * - Tailwind CSS v3 entegrasyonu
+ * - React entegrasyonu (Framer Motion için)
  */
 export default defineConfig({
   // Statik çıktı (Node.js runtime yok)
@@ -31,7 +33,8 @@ export default defineConfig({
     tailwind({
       // Base stilleri global.css'den gelecek
       applyBaseStyles: false
-    })
+    }),
+    react()
   ],
 
   // Performans optimizasyonları

@@ -11,10 +11,10 @@
  */
 
 import BaseLayout from '@layouts/BaseLayout.astro';
-import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import ProductCard from '@components/ProductCard.astro';
 import WhatsAppButton from '@components/WhatsAppButton.astro';
+import HeaderNav from '@components/HeaderNav.tsx';
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 
@@ -41,7 +41,7 @@ const countCocuk = page.data.filter((p) => p.data.category === 'cocuk').length;
   description="Yetiş Çorap bebek ve çocuk çorabı ürün kataloğu. Toptan satış için kaliteli, uygun fiyatlı çorap çeşitleri."
   lang="tr"
 >
-  <Header lang="tr" currentPath="/urunler" />
+  <HeaderNav lang="tr" currentPath="/urunler" client:load />
 
   <main>
     <!-- Başlık -->
