@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  HiPhone, 
-  HiHeart, 
+import {
+  HiPhone,
+  HiHeart,
   HiOutlineHeart,
-  HiMapPin, 
   HiMagnifyingGlass,
   HiXMark,
   HiBars3
@@ -127,6 +126,14 @@ const InstagramIcon = ({ className }: { className?: string }) => (
       backgroundClip: 'text'
     }} />
   </div>
+);
+
+// ==================== GOOGLE MAPS ICON ====================
+const GoogleMapsIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EA4335"/>
+    <path d="M12 11.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="white"/>
+  </svg>
 );
 
 // ==================== SEARCH DRAWER ====================
@@ -446,7 +453,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
     },
     {
       id: 'location',
-      icon: HiMapPin,
+      icon: GoogleMapsIcon,
       label: lang === 'tr' ? 'Konum' : 'Location',
       href: googleMapsUrl,
       external: true,
@@ -461,20 +468,28 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
       href: favoritesUrl,
       color: 'text-pink-500',
       hoverColor: 'hover:text-pink-600',
-      badge: favoritesCount,
       tooltip: lang === 'tr' ? 'Favoriler' : 'Favorites'
     }
   ];
 
-  // Mobile bottom nav items
+  // Mobile bottom nav items - Yeni sıralama: Ara - WhatsApp - Instagram - Konum - Favoriler
   const mobileNavItems: NavIconItem[] = [
     {
-      id: 'phone',
-      icon: HiPhone,
-      label: lang === 'tr' ? 'Ara' : 'Call',
-      href: phoneUrl,
-      color: 'text-emerald-500',
-      hoverColor: 'hover:text-emerald-600'
+      id: 'search',
+      icon: HiMagnifyingGlass,
+      label: lang === 'tr' ? 'Ara' : 'Search',
+      onClick: () => setIsSearchOpen(true),
+      color: 'text-gray-700',
+      hoverColor: 'hover:text-pink-500'
+    },
+    {
+      id: 'whatsapp',
+      icon: FaWhatsapp,
+      label: 'WhatsApp',
+      href: whatsappUrl,
+      external: true,
+      color: 'text-[#25D366]',
+      hoverColor: 'hover:text-[#128C7E]'
     },
     {
       id: 'instagram',
@@ -487,7 +502,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
     },
     {
       id: 'location',
-      icon: HiMapPin,
+      icon: GoogleMapsIcon,
       label: lang === 'tr' ? 'Konum' : 'Location',
       href: googleMapsUrl,
       external: true,
@@ -500,8 +515,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
       label: lang === 'tr' ? 'Favoriler' : 'Favorites',
       href: favoritesUrl,
       color: 'text-pink-500',
-      hoverColor: 'hover:text-pink-600',
-      badge: favoritesCount
+      hoverColor: 'hover:text-pink-600'
     }
   ];
 
@@ -596,17 +610,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
                       <Icon className="w-5 h-5" />
                     )}
                     
-                    {/* Badge */}
-                    {item.badge && item.badge > 0 && (
-                      <motion.span
-                        className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: 'spring', damping: 15 }}
-                      >
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </motion.span>
-                    )}
+                    {/* Badge removed - only showing heart icon */}
                   </motion.div>
                 );
 
@@ -675,30 +679,6 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
             />
           </a>
 
-          {/* WhatsApp Button (Center) */}
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative"
-          >
-            <motion.div
-              className="p-2 rounded-full bg-green-500 text-white"
-              animate={{
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatType: 'loop'
-              }}
-            >
-              <FaWhatsapp className="w-5 h-5" />
-            </motion.div>
-            {/* Pulse ring */}
-            <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-30" />
-          </a>
-
           {/* Hamburger Button */}
           <button
             type="button"
@@ -717,8 +697,8 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
         <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-t from-white/80 to-transparent pointer-events-none" />
         
         {/* Navbar container */}
-        <div 
-          className="h-16 flex items-center justify-around px-4"
+        <div
+          className="h-16 flex items-center justify-around px-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(12px)',
@@ -729,12 +709,59 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             
+            if (item.href) {
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
+                  className="relative flex flex-col items-center justify-center py-1"
+                >
+                  <motion.div
+                    className={`relative ${item.color}`}
+                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    {/* Special styling for WhatsApp */}
+                    {item.id === 'whatsapp' ? (
+                      <div className="w-6 h-6 relative">
+                        <FaWhatsapp className="w-full h-full" />
+                        {/* Pulse animation for WhatsApp */}
+                        <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
+                      </div>
+                    ) : /* Special gradient for Instagram */ item.id === 'instagram' ? (
+                      <div className="w-6 h-6">
+                        <SiInstagram
+                          className="w-full h-full"
+                          style={{
+                            fill: 'url(#instagram-gradient-mobile)'
+                          }}
+                        />
+                        <svg width="0" height="0">
+                          <linearGradient id="instagram-gradient-mobile" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor="#f09433" />
+                            <stop offset="25%" stopColor="#e6683c" />
+                            <stop offset="50%" stopColor="#dc2743" />
+                            <stop offset="75%" stopColor="#cc2366" />
+                            <stop offset="100%" stopColor="#bc1888" />
+                          </linearGradient>
+                        </svg>
+                      </div>
+                    ) : (
+                      <Icon className="w-6 h-6" />
+                    )}
+                  </motion.div>
+                  <span className="text-[10px] font-medium text-gray-600 mt-1">{item.label}</span>
+                </a>
+              );
+            }
+            
             return (
-              <a
+              <button
                 key={item.id}
-                href={item.href}
-                target={item.external ? '_blank' : undefined}
-                rel={item.external ? 'noopener noreferrer' : undefined}
+                type="button"
+                onClick={item.onClick}
                 className="relative flex flex-col items-center justify-center py-1"
               >
                 <motion.div
@@ -742,43 +769,10 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.1 }}
                 >
-                  {/* Special gradient for Instagram */}
-                  {item.id === 'instagram' ? (
-                    <div className="w-6 h-6">
-                      <SiInstagram 
-                        className="w-full h-full"
-                        style={{
-                          fill: 'url(#instagram-gradient-mobile)'
-                        }}
-                      />
-                      <svg width="0" height="0">
-                        <linearGradient id="instagram-gradient-mobile" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#f09433" />
-                          <stop offset="25%" stopColor="#e6683c" />
-                          <stop offset="50%" stopColor="#dc2743" />
-                          <stop offset="75%" stopColor="#cc2366" />
-                          <stop offset="100%" stopColor="#bc1888" />
-                        </linearGradient>
-                      </svg>
-                    </div>
-                  ) : (
-                    <Icon className="w-6 h-6" />
-                  )}
-                  
-                  {/* Badge */}
-                  {item.badge && item.badge > 0 && (
-                    <motion.span
-                      className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', damping: 15 }}
-                    >
-                      {item.badge > 9 ? '9+' : item.badge}
-                    </motion.span>
-                  )}
+                  <Icon className="w-6 h-6" />
                 </motion.div>
                 <span className="text-[10px] font-medium text-gray-600 mt-1">{item.label}</span>
-              </a>
+              </button>
             );
           })}
         </div>

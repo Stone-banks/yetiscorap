@@ -110,14 +110,31 @@ const products: Product[] = [
 
 const whatsappNumber = '905369205969';
 
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 // Skeleton Kart Komponenti
 const SkeletonCard = () => (
   <div className="bg-white rounded-xl overflow-hidden border border-slate-100 animate-pulse">
     <div className="aspect-square bg-slate-200" />
-    <div className="p-2">
-      <div className="h-3 bg-slate-200 rounded w-3/4 mb-2" />
-      <div className="h-2 bg-slate-200 rounded w-1/2 mb-2" />
-      <div className="h-8 bg-slate-200 rounded mt-2" />
+    <div className="p-3">
+      <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
+      <div className="h-3 bg-slate-200 rounded w-1/2 mb-3" />
+      <div className="h-10 bg-slate-200 rounded mt-2" />
     </div>
   </div>
 );
@@ -188,11 +205,11 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="product-card group bg-white rounded-xl overflow-hidden border border-slate-100 cursor-pointer relative"
+      className="product-card group bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg cursor-pointer relative transition-shadow duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onQuickView(product)}
-      whileHover={{ scale: 1.02, y: -4 }}
+      whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
     >
       {/* Ürün Görseli */}
@@ -211,14 +228,14 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
         
         {/* Ürün Kodu Badge */}
         <div className="absolute top-2 left-2">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold bg-pink-500 text-white shadow-md">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-pink-500 text-white shadow-md">
             {product.code}
           </span>
         </div>
 
         {/* Favori Butonu */}
         <motion.button
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md z-10"
+          className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md z-10"
           onClick={handleFavoriteClick}
           whileTap={{ scale: 1.3 }}
         >
@@ -245,23 +262,23 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
       </div>
       
       {/* Ürün Bilgileri */}
-      <div className="p-2">
-        <h3 className="font-medium text-slate-800 text-xs leading-tight mb-1 line-clamp-2">
+      <div className="p-3">
+        <h3 className="font-semibold text-slate-800 text-sm leading-tight mb-1 line-clamp-2">
           {product.name}
         </h3>
-        <p className="text-[10px] text-slate-500 mb-2">{product.ageRange}</p>
+        <p className="text-xs text-slate-500 mb-3">{product.ageRange}</p>
         
         {/* Soru Sor Butonu */}
         <motion.a
           href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Merhaba, ${product.code} kodlu ürün hakkında bilgi almak istiyorum.`)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-1.5 bg-green-500 text-white text-[10px] font-semibold rounded-lg flex items-center justify-center gap-1 relative overflow-hidden"
+          className="w-full py-2.5 bg-green-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 relative overflow-hidden"
           onClick={(e) => e.stopPropagation()}
           whileHover={{ backgroundColor: '#16a34a' }}
           whileTap={{ scale: 0.95 }}
         >
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
           Soru Sor
@@ -403,7 +420,7 @@ const QuickViewModal = ({ product, onClose, isFavorite, onToggleFavorite }: Quic
 };
 
 // Empty State
-const EmptyState = ({ isFavoritesFilter }: { isFavoritesFilter?: boolean }) => (
+const EmptyState = () => (
   <motion.div
     className="text-center py-16"
     initial={{ opacity: 0, y: 20 }}
@@ -413,30 +430,22 @@ const EmptyState = ({ isFavoritesFilter }: { isFavoritesFilter?: boolean }) => (
     <motion.div
       className="w-24 h-24 mx-auto mb-6 text-slate-300"
       animate={{ 
-        rotate: isFavoritesFilter ? 0 : [0, -10, 10, -10, 0],
+        rotate: [0, -10, 10, -10, 0],
         scale: [1, 1.1, 1]
       }}
       transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
     >
-      {isFavoritesFilter ? (
-        <HiOutlineHeart className="w-full h-full" />
-      ) : (
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-        </svg>
-      )}
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
     </motion.div>
     <h3 className="text-xl font-semibold text-slate-700 mb-2">
-      {isFavoritesFilter ? 'Henüz favori ürün yok' : 'Aramanızla eşleşen ürün bulunamadı'}
+      Aramanızla eşleşen ürün bulunamadı
     </h3>
     <p className="text-slate-500 mb-4">
-      {isFavoritesFilter 
-        ? 'Beğendiğiniz ürünlerin kalp ikonuna tıklayarak favorilere ekleyebilirsiniz.'
-        : 'Farklı anahtar kelimeler deneyin veya filtreleri temizleyin.'}
+      Farklı anahtar kelimeler deneyin veya filtreleri temizleyin.
     </p>
-    {!isFavoritesFilter && (
-      <p className="text-sm text-slate-400">💡 İpucu: Aramanızı genişletmek için daha kısa kelimeler deneyin</p>
-    )}
+    <p className="text-sm text-slate-400">💡 İpucu: Aramanızı genişletmek için daha kısa kelimeler deneyin</p>
   </motion.div>
 );
 
@@ -480,17 +489,19 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 export default function CatalogSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounced arama değeri (300ms gecikme)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Kategoriler
   const categories = [
     { id: 'all', label: 'Tümü' },
     { id: 'bebek', label: 'Bebek Çorapları' },
-    { id: 'cocuk', label: 'Çocuk Çorapları' },
-    { id: 'favorites', label: `❤️ Favoriler`, count: favorites.length }
+    { id: 'cocuk', label: 'Çocuk Çorapları' }
   ];
 
   // Sayfa yüklendiğinde localStorage'dan favorileri al
@@ -534,22 +545,44 @@ export default function CatalogSection() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Kategori toggle fonksiyonu
+  const toggleCategory = (categoryId: string) => {
+    if (categoryId === 'all') {
+      // "Tümü" seçildiğinde diğerlerini temizle
+      setActiveCategories([]);
+    } else {
+      setActiveCategories(prev => {
+        if (prev.includes(categoryId)) {
+          // Kategori zaten seçili, kaldır
+          return prev.filter(id => id !== categoryId);
+        } else {
+          // Kategori ekle
+          return [...prev, categoryId];
+        }
+      });
+    }
+  };
+
+  // Kategori aktif mi kontrol et
+  const isCategoryActive = (categoryId: string) => {
+    if (categoryId === 'all') {
+      return activeCategories.length === 0;
+    }
+    return activeCategories.includes(categoryId);
+  };
+
   // Filtrelenmiş ürünler
   const filteredProducts = useMemo(() => {
     let result = products;
 
-    // Favoriler filtresi
-    if (activeCategory === 'favorites') {
-      result = products.filter(product => 
-        favorites.some(fav => fav.id === product.id)
-      );
-    } else if (activeCategory !== 'all') {
-      result = result.filter(product => product.category === activeCategory);
+    // Kategori filtresi (çoklu seçim)
+    if (activeCategories.length > 0) {
+      result = result.filter(product => activeCategories.includes(product.category));
     }
 
-    // Arama filtresi
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    // Arama filtresi (debounced)
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       result = result.filter(product =>
         product.code.toLowerCase().includes(query) ||
         product.name.toLowerCase().includes(query)
@@ -557,7 +590,7 @@ export default function CatalogSection() {
     }
 
     return result;
-  }, [activeCategory, searchQuery, favorites]);
+  }, [activeCategories, debouncedSearchQuery]);
 
   // Favori toggle
   const toggleFavorite = (product: Product) => {
@@ -573,12 +606,6 @@ export default function CatalogSection() {
   // Favori mi kontrol et
   const isFavorite = (productId: number) => {
     return favorites.some(fav => fav.id === productId);
-  };
-
-  // Arama inputuna focus
-  const handleSearchClick = () => {
-    searchInputRef.current?.focus();
-    searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   return (
@@ -621,6 +648,15 @@ export default function CatalogSection() {
                 placeholder="Ürün kodu veya isim ara... (örn: KOD-14)"
                 className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm transition-all placeholder:text-slate-400"
               />
+              {/* Arama göstergesi */}
+              {searchQuery && searchQuery !== debouncedSearchQuery && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -635,26 +671,21 @@ export default function CatalogSection() {
               {categories.map((cat) => (
                 <motion.button
                   key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
+                  onClick={() => toggleCategory(cat.id)}
                   className={`flex-shrink-0 px-4 md:px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap flex items-center gap-2 ${
-                    activeCategory === cat.id
-                      ? cat.id === 'favorites' 
-                        ? 'bg-red-500 text-white shadow-md'
-                        : 'bg-pink-500 text-white shadow-md'
+                    isCategoryActive(cat.id)
+                      ? 'bg-pink-500 text-white shadow-md'
                       : 'bg-white text-slate-600 border border-slate-200 hover:border-pink-300 hover:text-pink-500'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <span>{cat.label}</span>
-                  {cat.count !== undefined && cat.count > 0 && (
-                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                      activeCategory === cat.id 
-                        ? 'bg-white/20' 
-                        : 'bg-red-100 text-red-600'
-                    }`}>
-                      {cat.count}
-                    </span>
+                  {/* Seçili ise checkmark göster */}
+                  {isCategoryActive(cat.id) && cat.id !== 'all' && (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
                   )}
                 </motion.button>
               ))}
@@ -673,12 +704,12 @@ export default function CatalogSection() {
             </p>
           </motion.div>
 
-          {/* Ürün Grid */}
+          {/* Ürün Grid - Mobilde 1, Tablette 2, Masaüstünde 3-4 kolon */}
           <AnimatePresence mode="wait">
             {isLoading ? (
               <motion.div
                 key="skeleton"
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -688,11 +719,11 @@ export default function CatalogSection() {
                 ))}
               </motion.div>
             ) : filteredProducts.length === 0 ? (
-              <EmptyState key="empty" isFavoritesFilter={activeCategory === 'favorites'} />
+              <EmptyState key="empty" />
             ) : (
               <motion.div
                 key="products"
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
