@@ -16,97 +16,21 @@ interface Product {
   sizes?: string[];
 }
 
-// Örnek ürün verileri
-const products: Product[] = [
-  {
-    id: 1,
-    code: 'KOD-01',
-    name: 'Dantelli Kız Bebek Çorabı',
-    category: 'bebek',
-    ageRange: '0-6 Ay',
-    image: '/images/placeholder.png',
-    description: 'Zarif dantel detaylı, yumuşak pamuklu bebek çorabı. Hassas bebek cildine uygun.',
-    colors: ['Pembe', 'Beyaz', 'Krem'],
-    sizes: ['0-3 Ay', '3-6 Ay']
-  },
-  {
-    id: 2,
-    code: 'KOD-02',
-    name: 'Fırfırlı Bebek Patik',
-    category: 'bebek',
-    ageRange: '0-12 Ay',
-    image: '/images/placeholder.png',
-    description: 'Şık fırfır detaylı patik çorap. %100 pamuk.',
-    colors: ['Pembe', 'Mor', 'Beyaz'],
-    sizes: ['0-6 Ay', '6-12 Ay']
-  },
-  {
-    id: 3,
-    code: 'KOD-03',
-    name: 'Kaymaz Tabanlı Bebek Çorabı',
-    category: 'bebek',
-    ageRange: '6-12 Ay',
-    image: '/images/placeholder.png',
-    description: 'Silikon kaymaz tabanlı, güvenli yürüyüş için tasarlandı.',
-    colors: ['Mavi', 'Gri', 'Beyaz'],
-    sizes: ['6-9 Ay', '9-12 Ay']
-  },
-  {
-    id: 4,
-    code: 'KOD-04',
-    name: 'Organik Pamuklu Yenidoğan Seti',
-    category: 'bebek',
-    ageRange: '0-3 Ay',
-    image: '/images/placeholder.png',
-    description: '%100 organik pamuk. Yenidoğan bebekler için ideal.',
-    colors: ['Beyaz', 'Krem'],
-    sizes: ['Tek Beden']
-  },
-  {
-    id: 5,
-    code: 'KOD-14',
-    name: 'Desenli Kız Çocuk Çorabı',
-    category: 'cocuk',
-    ageRange: '3-5 Yaş',
-    image: '/images/placeholder.png',
-    description: 'Eğlenceli desenli, rahat çocuk çorabı.',
-    colors: ['Pembe', 'Mor', 'Turkuaz'],
-    sizes: ['3-4 Yaş', '4-5 Yaş']
-  },
-  {
-    id: 6,
-    code: 'KOD-15',
-    name: 'Spor Erkek Çocuk Çorabı',
-    category: 'cocuk',
-    ageRange: '4-6 Yaş',
-    image: '/images/placeholder.png',
-    description: 'Spor aktiviteleri için ideal, nefes alan kumaş.',
-    colors: ['Lacivert', 'Siyah', 'Beyaz'],
-    sizes: ['4-5 Yaş', '5-6 Yaş']
-  },
-  {
-    id: 7,
-    code: 'KOD-23',
-    name: 'Okul Çorabı Seti',
-    category: 'cocuk',
-    ageRange: '6-10 Yaş',
-    image: '/images/placeholder.png',
-    description: 'Okul kullanımı için ideal, dayanıklı çorap seti.',
-    colors: ['Beyaz', 'Lacivert', 'Siyah'],
-    sizes: ['6-8 Yaş', '8-10 Yaş']
-  },
-  {
-    id: 8,
-    code: 'KOD-24',
-    name: 'Renkli Çizgili Çocuk Çorabı',
-    category: 'cocuk',
-    ageRange: '5-8 Yaş',
-    image: '/images/placeholder.png',
-    description: 'Neşeli çizgi desenli, pamuklu çocuk çorabı.',
-    colors: ['Çok Renkli'],
-    sizes: ['5-6 Yaş', '6-8 Yaş']
+// URL'den JSON dosyasını okuyan fonksiyon
+const fetchProducts = async (): Promise<Product[]> => {
+  try {
+    const response = await fetch('/urunler.json');
+    if (!response.ok) {
+      throw new Error('Failed to fetch products');
+    }
+    const products = await response.json();
+    return products;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    // Hata durumunda boş dizi dön
+    return [];
   }
-];
+};
 
 const whatsappNumber = '905369205969';
 
@@ -488,6 +412,7 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 // Ana CatalogSection Komponenti
 export default function CatalogSection() {
   const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<Product[]>([]);
@@ -496,6 +421,26 @@ export default function CatalogSection() {
 
   // Debounced arama değeri (300ms gecikme)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // JSON'dan ürünleri getir
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const fetchedProducts = await fetchProducts();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        toast.error('Ürünler yüklenirken hata oluştu');
+      } finally {
+        // Minimum loading süresi için
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   // Kategoriler
   const categories = [
