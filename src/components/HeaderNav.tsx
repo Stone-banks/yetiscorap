@@ -6,7 +6,10 @@ import {
   HiOutlineHeart,
   HiMagnifyingGlass,
   HiXMark,
-  HiBars3
+  HiBars3,
+  HiOutlineHome,
+  HiOutlineSquares2X2,
+  HiOutlineEnvelope
 } from 'react-icons/hi2';
 import { SiInstagram } from 'react-icons/si';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -261,58 +264,86 @@ const MobileDrawer = ({
     return currentPath.startsWith(href);
   };
 
+  // Menu item icons
+  const getMenuIcon = (href: string) => {
+    if (href === '/' || href === '/en') {
+      return <HiOutlineHome className="w-5 h-5" />;
+    }
+    if (href.includes('urunler') || href.includes('products')) {
+      return <HiOutlineSquares2X2 className="w-5 h-5" />;
+    }
+    if (href.includes('iletisim') || href.includes('contact')) {
+      return <HiOutlineEnvelope className="w-5 h-5" />;
+    }
+    return null;
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          
-          {/* Drawer Panel */}
+
+          {/* Drawer Panel - %75 genişlik, sağdan gölge */}
           <motion.aside
-            className="fixed top-0 right-0 bottom-0 w-[300px] max-w-[85vw] bg-white z-[70] shadow-2xl md:hidden"
+            className="fixed top-0 right-0 bottom-0 w-[75vw] max-w-[320px] bg-white z-[70] md:hidden"
+            style={{
+              boxShadow: '-8px 0 30px -5px rgba(0, 0, 0, 0.15)'
+            }}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
           >
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-end p-4">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Menü</span>
                 <button
                   onClick={onClose}
-                  className="p-3 rounded-full hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-full hover:bg-gray-50 transition-colors"
                 >
-                  <HiXMark className="w-6 h-6 text-black" />
+                  <HiXMark className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
 
-              {/* Navigation - Sadece 3 Menü */}
-              <nav className="flex-1 overflow-y-auto py-8 px-6">
-                <ul className="space-y-4">
+              {/* Navigation - Minimalist */}
+              <nav className="flex-1 overflow-y-auto py-4 px-3">
+                <ul className="space-y-1">
                   {menuItems.map((item) => (
                     <li key={item.href}>
                       <a
                         href={item.href}
-                        className={`block px-6 py-8 text-3xl font-bold transition-all duration-200 border-b ${
+                        className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 ${
                           isActive(item.href)
-                            ? 'text-[#EC4899] border-[#EC4899]/20'
-                            : 'text-black hover:text-[#EC4899] border-gray-200'
+                            ? 'text-pink-600 bg-pink-50'
+                            : 'text-gray-700 hover:text-pink-600 hover:bg-gray-50'
                         }`}
                         onClick={onClose}
                       >
+                        <span className={`${isActive(item.href) ? 'text-pink-500' : 'text-gray-400'}`}>
+                          {getMenuIcon(item.href)}
+                        </span>
                         {item.label}
                       </a>
                     </li>
                   ))}
                 </ul>
               </nav>
+
+              {/* Footer */}
+              <div className="px-5 py-4 border-t border-gray-100">
+                <p className="text-[10px] text-gray-400 text-center">
+                  © 2024 Yetiş Çorap
+                </p>
+              </div>
             </div>
           </motion.aside>
         </>
@@ -609,8 +640,16 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
             />
           </a>
 
-          {/* Sağ taraf: Dil Seçimi + Hamburger */}
-          <div className="flex items-center gap-2">
+          {/* Sağ taraf: İletişim + Dil Seçimi + Hamburger */}
+          <div className="flex items-center gap-3">
+            {/* İletişim Linki */}
+            <a
+              href={lang === 'tr' ? '/iletisim' : '/en/contact'}
+              className="text-xs font-medium text-slate-600 hover:text-pink-500 transition-colors"
+            >
+              {lang === 'tr' ? 'İletişim' : 'Contact'}
+            </a>
+
             {/* Dil Seçimi - Bayrak İkonları */}
             <div className="flex items-center gap-1">
               <a
