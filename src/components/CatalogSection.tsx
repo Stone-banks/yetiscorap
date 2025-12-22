@@ -466,7 +466,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent backdrop-blur-sm" />
               
               <motion.div
-                className="relative h-full flex flex-col justify-between p-8 text-white"
+                className="relative h-full flex flex-col justify-between p-6 sm:p-8 text-white"
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
@@ -474,43 +474,43 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
                 {/* Top Section with Badge and Close Button */}
                 <div className="flex justify-between items-start">
                   {/* Shiny Pink Badge */}
-                  <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full shadow-lg backdrop-blur-sm">
-                    <span className="text-sm font-semibold text-white drop-shadow-lg">Sınırları Keşfedin</span>
+                  <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full shadow-lg backdrop-blur-sm">
+                    <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-lg">Sınırları Keşfedin</span>
                   </div>
                   
                   {/* Close Button - X */}
                   <button
                     onClick={onClose}
-                    className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
                   >
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
 
                 {/* Middle Section - Main Content */}
-                <div className="text-center flex-1 flex flex-col justify-center items-center px-4">
-                  <h2 className="text-6xl md:text-7xl font-black text-white mb-8 leading-none drop-shadow-2xl">
+                <div className="text-center flex-1 flex flex-col justify-center items-center px-2 sm:px-4">
+                  <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white mb-4 sm:mb-6 md:mb-8 leading-none drop-shadow-2xl">
                     Tam
                     <br />
                     Katalog
                   </h2>
                   
-                  <p className="text-lg md:text-xl text-white/90 mb-12 max-w-md leading-relaxed drop-shadow-lg">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 md:mb-12 max-w-sm sm:max-w-md leading-relaxed drop-shadow-lg">
                     Bebek ve çocuk modasında en trend 100'den fazla model sizi bekliyor.
                   </p>
                 </div>
 
                 {/* Bottom Section - CTA Button */}
-                <div className="flex justify-center">
+                <div className="flex justify-center pb-4">
                   <a
                     href="/urunler"
                     onClick={onClose}
-                    className="group inline-flex items-center gap-3 px-10 py-4 bg-white text-gray-900 text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-110 hover:bg-pink-500 hover:text-white hover:shadow-2xl hover:shadow-pink-500/50"
+                    className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 bg-white text-gray-900 text-base sm:text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-105 sm:hover:scale-110 hover:bg-pink-500 hover:text-white hover:shadow-2xl hover:shadow-pink-500/50"
                   >
-                    <span>Hemen İncele</span>
-                    <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <span className="text-sm sm:text-base">Hemen İncele</span>
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
                   </a>
