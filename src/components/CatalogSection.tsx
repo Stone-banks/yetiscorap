@@ -811,7 +811,7 @@ const translations: Record<'tr' | 'en', {
     askQuestion: 'Soru Sor',
     getQuote: 'Teklif Al',
     goToCatalog: 'Kataloğa Git',
-    productsCount: '+ ür��n',
+    productsCount: '+ ürün',
     
     // Pagination
     previous: 'Önceki',

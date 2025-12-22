@@ -144,7 +144,7 @@ const GoogleReviews = () => {
 
           <div
             id="reviews-container"
-            className="flex gap-4 md:gap-6 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-4 scrollbar-hide cursor-grab active:cursor-grabbing scroll-smooth touch-pan-x px-2 -mx-2"
+            className="flex gap-4 md:gap-6 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-4 scrollbar-hide cursor-grab active:cursor-grabbing scroll-smooth px-2 -mx-2"
             onMouseDown={() => setIsDragging(true)}
             onMouseUp={() => setIsDragging(false)}
             onMouseLeave={() => setIsDragging(false)}
@@ -157,7 +157,8 @@ const GoogleReviews = () => {
             }}
             style={{
               scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              msOverflowStyle: 'none',
+              touchAction: 'pan-x pan-y'
             }}
           >
             {reviews.map((review, index) => (
@@ -224,7 +225,7 @@ const GoogleReviews = () => {
           {/* Daha Fazla Yorum Gör Butonu */}
           <div className="text-center mt-6">
             <motion.a
-              href="https://maps.app.goo.gl/s4TyJvp8L4dCikNL8"
+              href="https://maps.app.goo.gl/btf6xuFSQuvyBW117"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-400 text-white font-semibold rounded-full hover:from-pink-600 hover:to-pink-500 transition-all duration-300 shadow-md hover:shadow-lg"

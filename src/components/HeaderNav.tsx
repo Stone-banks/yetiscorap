@@ -375,7 +375,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
   // URLs
   const phoneUrl = 'tel:+905369205969';
   const instagramUrl = 'https://www.instagram.com/yetiscorap/';
-  const googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=41.043889,28.88469';
+  const googleMapsUrl = 'https://maps.app.goo.gl/btf6xuFSQuvyBW117';
   const favoritesUrl = lang === 'tr' ? '/favoriler' : '/en/favorites';
   const whatsappMsg = lang === 'tr'
     ? encodeURIComponent('Merhaba, ürünleriniz hakkında bilgi almak istiyorum.')
@@ -523,9 +523,8 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
                 <img
                   src="/yetiscoraplogo.png"
                   alt="Yetiş Çorap"
-                  className={`relative w-auto object-contain transition-all duration-300 ${
-                    isScrolled ? 'h-10' : 'h-12'
-                  }`}
+                  className="relative object-contain transition-all duration-300"
+                  style={{ width: '140px', height: 'auto' }}
                 />
               </div>
               {/* Mini Slogan */}
@@ -667,7 +666,8 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
               <img
                 src="/yetiscoraplogo.png"
                 alt="Yetiş Çorap"
-                className="relative h-9 w-auto object-contain"
+                className="relative object-contain"
+                style={{ width: '110px', height: 'auto' }}
               />
             </div>
           </a>
