@@ -103,10 +103,10 @@ const GoogleReviews = () => {
   };
 
   return (
-    <section className="bg-white py-12 overflow-hidden">
+    <section className="py-12 md:py-16 overflow-hidden">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3">
             Müşterilerimizin <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-pink-400">Google Yorumları</span>
           </h2>
@@ -122,29 +122,29 @@ const GoogleReviews = () => {
 
         {/* Reviews Slider */}
         <div className="relative">
-          {/* Navigasyon Okları - Her zaman görünür */}
+          {/* Navigasyon Okları - Modern Glassmorphism Style */}
           <button
             onClick={() => {
               handlePrev();
               scrollToCard(currentIndex - 1 < 0 ? reviews.length - 1 : currentIndex - 1);
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-10 h-10 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full border border-white/20 shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110 flex"
           >
-            <HiChevronLeft className="w-6 h-6 text-slate-700" />
+            <HiChevronLeft className="w-5 h-5 text-slate-700" />
           </button>
           <button
             onClick={() => {
               handleNext();
               scrollToCard(currentIndex + 1 >= reviews.length ? 0 : currentIndex + 1);
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-10 h-10 bg-white/40 hover:bg-white/60 backdrop-blur-md rounded-full border border-white/20 shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110 flex"
           >
-            <HiChevronRight className="w-6 h-6 text-slate-700" />
+            <HiChevronRight className="w-5 h-5 text-slate-700" />
           </button>
 
           <div
             id="reviews-container"
-            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-hide cursor-grab active:cursor-grabbing scroll-smooth touch-pan-y"
+            className="flex gap-4 md:gap-6 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-4 scrollbar-hide cursor-grab active:cursor-grabbing scroll-smooth touch-pan-x px-2 -mx-2"
             onMouseDown={() => setIsDragging(true)}
             onMouseUp={() => setIsDragging(false)}
             onMouseLeave={() => setIsDragging(false)}
@@ -166,7 +166,7 @@ const GoogleReviews = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: review.id * 0.1 }}
-                className={`flex-shrink-0 w-[calc(85vw-2rem)] sm:w-80 md:w-96 bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 snap-center first:ml-4 last:mr-4 ${
+                className={`flex-shrink-0 w-[75vw] sm:w-80 md:w-96 bg-white/95 backdrop-blur-sm rounded-lg shadow-md hover:shadow-xl border border-slate-100/50 transition-all duration-300 snap-center ${
                   index === currentIndex ? 'ring-2 ring-pink-200' : ''
                 }`}
               >
@@ -222,7 +222,7 @@ const GoogleReviews = () => {
           </div>
 
           {/* Daha Fazla Yorum Gör Butonu */}
-          <div className="text-center mt-8">
+          <div className="text-center mt-6">
             <motion.a
               href="https://maps.app.goo.gl/s4TyJvp8L4dCikNL8"
               target="_blank"

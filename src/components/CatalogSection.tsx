@@ -55,7 +55,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 // Skeleton Kart Komponenti
 const SkeletonCard = () => (
-  <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden border border-slate-100 animate-pulse">
+  <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-lg animate-pulse">
     <div className="aspect-square bg-slate-200" />
     <div className="p-2 sm:p-3">
       <div className="h-3 sm:h-4 bg-slate-200 rounded w-3/4 mb-1.5 sm:mb-2" />
@@ -91,9 +91,10 @@ interface ProductCardProps {
   viewMode: 'grid' | 'list';
   onToggleFavorite: (product: Product) => void;
   onQuickView: (product: Product) => void;
+  lang: 'tr' | 'en';
 }
 
-const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, onQuickView }: ProductCardProps) => {
+const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, onQuickView, lang }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -124,7 +125,8 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
     if (!isFavorite) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 700);
-      toast.success(`${product.name} favorilere eklendi!`, {
+      const t = translations[lang];
+      toast.success(`${product.name} ${t.addedToFavorites}`, {
         icon: '❤️',
         style: {
           borderRadius: '10px',
@@ -133,7 +135,8 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
         },
       });
     } else {
-      toast.success(`${product.name} favorilerden çıkarıldı`, {
+      const t = translations[lang];
+      toast.success(`${product.name} ${t.removedFromFavorites}`, {
         icon: '💔',
         style: {
           borderRadius: '10px',
@@ -153,7 +156,7 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className={`product-card group bg-white rounded-lg sm:rounded-xl overflow-hidden border shadow-sm hover:shadow-lg cursor-pointer relative transition-all duration-300 ${
+      className={`product-card group bg-white rounded-2xl overflow-hidden border shadow-lg hover:shadow-xl cursor-pointer relative transition-all duration-300 ${
         viewMode === 'list'
           ? 'flex items-center gap-4 p-4'
           : 'border-slate-100'
@@ -260,7 +263,7 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
 
         {/* Soru Sor Butonu */}
         <motion.a
-          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Merhaba, ${product.code} kodlu ürün hakkında bilgi almak istiyorum.`)}`}
+          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(translations[lang].whatsappCard.replace('{code}', product.code))}`}
           target="_blank"
           rel="noopener noreferrer"
           className={`bg-green-500 text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 relative overflow-hidden transition-all ${
@@ -275,7 +278,7 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
           <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
-          <span>{viewMode === 'list' ? 'Teklif Al' : 'Soru Sor'}</span>
+          <span>{viewMode === 'list' ? translations[lang].getQuote : translations[lang].askQuestion}</span>
         </motion.a>
       </div>
     </motion.article>
@@ -291,6 +294,7 @@ interface QuickViewModalProps {
   isFavorite: boolean;
   onToggleFavorite: (product: Product) => void;
   mode?: 'home' | 'full';
+  lang: 'tr' | 'en';
 }
 
 // Yeni bir redirect ürün tipi tanımlayalım
@@ -298,7 +302,7 @@ interface RedirectProduct extends Product {
   type: 'redirect';
 }
 
-const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, onToggleFavorite, mode = 'full' }: QuickViewModalProps) => {
+const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, onToggleFavorite, mode = 'full', lang }: QuickViewModalProps) => {
   const [direction, setDirection] = useState(0);
   const [imageKey, setImageKey] = useState(0);
 
@@ -307,10 +311,11 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
   // Ana sayfa modunda 5. üründen sonra redirect objesi ekle
   const extendedProducts = useMemo(() => {
     if (mode === 'home' && products.length >= 5) {
+      const t = translations[lang];
       const redirectProduct: RedirectProduct = {
         id: -1,
         code: 'REDIRECT',
-        name: 'Tüm Ürünler',
+        name: t.redirectName,
         category: 'bebek',
         ageRange: '',
         image: '',
@@ -319,7 +324,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
       return [...products.slice(0, 5), redirectProduct];
     }
     return products;
-  }, [products, mode]);
+  }, [products, mode, lang]);
 
   // Mevcut ürünün index'ini bul
   const currentIndex = extendedProducts.findIndex(p => p.id === product.id);
@@ -342,7 +347,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
     onNavigate(extendedProducts[prevIndex]);
   };
 
-  // Sonraki ürüne git (limited for home mode)
+  // Sonraki ��rüne git (limited for home mode)
   const handleNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setDirection(1);
@@ -475,7 +480,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
                 <div className="flex justify-between items-start">
                   {/* Shiny Pink Badge */}
                   <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full shadow-lg backdrop-blur-sm">
-                    <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-lg">Sınırları Keşfedin</span>
+                    <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-lg">{translations[lang].redirectBadge}</span>
                   </div>
                   
                   {/* Close Button - X */}
@@ -491,25 +496,23 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
 
                 {/* Middle Section - Main Content */}
                 <div className="text-center flex-1 flex flex-col justify-center items-center px-2 sm:px-4">
-                  <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white mb-4 sm:mb-6 md:mb-8 leading-none drop-shadow-2xl">
-                    Tam
-                    <br />
-                    Katalog
+                  <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white mb-4 sm:mb-6 md:mb-8 leading-none drop-shadow-2xl whitespace-pre-line">
+                    {translations[lang].redirectTitle}
                   </h2>
                   
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 md:mb-12 max-w-sm sm:max-w-md leading-relaxed drop-shadow-lg">
-                    Bebek ve çocuk modasında en trend 100'den fazla model sizi bekliyor.
+                    {translations[lang].redirectDesc}
                   </p>
                 </div>
 
                 {/* Bottom Section - CTA Button */}
                 <div className="flex justify-center pb-4">
                   <a
-                    href="/urunler"
+                    href={translations[lang].redirectLink}
                     onClick={onClose}
                     className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 bg-white text-gray-900 text-base sm:text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-105 sm:hover:scale-110 hover:bg-pink-500 hover:text-white hover:shadow-2xl hover:shadow-pink-500/50"
                   >
-                    <span className="text-sm sm:text-base">Hemen İncele</span>
+                    <span className="text-sm sm:text-base">{translations[lang].redirectButton}</span>
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -617,7 +620,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
             {/* Colors */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-4">
-                <h4 className="text-sm font-semibold text-slate-700 mb-2">Renkler</h4>
+                <h4 className="text-sm font-semibold text-slate-700 mb-2">{translations[lang].colors}</h4>
                 <div className="flex flex-wrap gap-2">
                   {product.colors.map((color) => (
                     <span key={color} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
@@ -631,7 +634,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
             {/* Sizes */}
             {product.sizes && product.sizes.length > 0 && (
               <div className="mb-6">
-                <h4 className="text-sm font-semibold text-slate-700 mb-2">Bedenler</h4>
+                <h4 className="text-sm font-semibold text-slate-700 mb-2">{translations[lang].sizes}</h4>
                 <div className="flex flex-wrap gap-2">
                   {product.sizes.map((size) => (
                     <span key={size} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
@@ -644,7 +647,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
 
             {/* WhatsApp Button */}
             <motion.a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Merhaba, ${product.code} kodlu "${product.name}" ürünü hakkında bilgi almak istiyorum.`)}`}
+              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(translations[lang].whatsappModalFull.replace('{code}', product.code).replace('{name}', product.name))}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-4 bg-green-500 text-white font-semibold rounded-xl flex items-center justify-center gap-3"
@@ -654,7 +657,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
               </svg>
-              WhatsApp'tan Sor
+              {translations[lang].whatsappModal}
             </motion.a>
           </motion.div>
         )}
@@ -664,7 +667,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
 };
 
 // Empty State
-const EmptyState = ({ hasFilterFavorites }: { hasFilterFavorites?: boolean }) => (
+const EmptyState = ({ hasFilterFavorites, lang }: { hasFilterFavorites?: boolean; lang: 'tr' | 'en' }) => (
   <motion.div
     className="text-center py-16"
     initial={{ opacity: 0, y: 20 }}
@@ -690,16 +693,16 @@ const EmptyState = ({ hasFilterFavorites }: { hasFilterFavorites?: boolean }) =>
       )}
     </motion.div>
     <h3 className="text-xl font-semibold text-slate-700 mb-2">
-      {hasFilterFavorites ? 'Henüz favori ürününüz bulunmuyor' : 'Aranızla eşleşen ürün bulunamadı'}
+      {hasFilterFavorites ? translations[lang].noFavorites : translations[lang].noResults}
     </h3>
     <p className="text-slate-500 mb-4">
       {hasFilterFavorites
-        ? 'Kalp ikonuna tıklayarak ürünleri favorilerinize ekleyebilirsiniz.'
-        : 'Farklı anahtar kelimeler deneyin veya filtreleri temizleyin.'
+        ? translations[lang].noFavoritesDesc
+        : translations[lang].noResultsDesc
       }
     </p>
     {!hasFilterFavorites && (
-      <p className="text-sm text-slate-400">💡 İpucu: Aramanızı genişletmek için daha kısa kelimeler deneyin</p>
+      <p className="text-sm text-slate-400">{translations[lang].tryDifferentKeywords}</p>
     )}
   </motion.div>
 );
@@ -741,12 +744,184 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 };
 
 
+// Dil metinleri
+type TranslationsType = typeof translations;
+const translations: Record<'tr' | 'en', {
+  sectionTitleHome: string;
+  sectionTitleFull: string;
+  collectionBadge: string;
+  sectionDescHome: string;
+  sectionDescFull: string;
+  all: string;
+  baby: string;
+  child: string;
+  favorites: string;
+  searchPlaceholder: string;
+  productsFound: string;
+  gridView: string;
+  listView: string;
+  askQuestion: string;
+  getQuote: string;
+  goToCatalog: string;
+  productsCount: string;
+  previous: string;
+  next: string;
+  pageInfo: string;
+  productsWord: string;
+  noResults: string;
+  noResultsDesc: string;
+  clearFilters: string;
+  noFavorites: string;
+  noFavoritesDesc: string;
+  tryDifferentKeywords: string;
+  addedToFavorites: string;
+  removedFromFavorites: string;
+  redirectBadge: string;
+  redirectTitle: string;
+  redirectDesc: string;
+  redirectButton: string;
+  redirectLink: string;
+  redirectName: string;
+  whatsappModal: string;
+  colors: string;
+  sizes: string;
+  whatsappCard: string;
+  whatsappModalFull: string;
+  loadError: string;
+}> = {
+  tr: {
+    // Section titles
+    sectionTitleHome: 'Son Eklenenler',
+    sectionTitleFull: 'Ürün Kataloğu',
+    collectionBadge: '2026 Koleksiyonu',
+    sectionDescHome: 'En yeni ürünlerimizden bazıları',
+    sectionDescFull: 'Bebek ve çocuk çoraplarımızı inceleyin',
+    
+    // Filters
+    all: 'Tümü',
+    baby: 'Bebek Çorapları',
+    child: 'Çocuk Çorapları',
+    favorites: 'Favoriler',
+    searchPlaceholder: 'Ürün kodu veya isim ara... (örn: KOD-14)',
+    productsFound: 'ürün bulundu',
+    
+    // Buttons
+    gridView: 'Geniş Kart Görünümü',
+    listView: 'Kompakt Liste Görünümü',
+    askQuestion: 'Soru Sor',
+    getQuote: 'Teklif Al',
+    goToCatalog: 'Kataloğa Git',
+    productsCount: '+ ür��n',
+    
+    // Pagination
+    previous: 'Önceki',
+    next: 'Sonraki',
+    pageInfo: '. sayfa - Toplam',
+    productsWord: 'ürün',
+    
+    // Empty state
+    noResults: 'Aranızla eşleşen ürün bulunamadı',
+    noResultsDesc: 'Filtreleri temizleyip tekrar deneyin.',
+    clearFilters: 'Filtreleri Temizle',
+    noFavorites: 'Henüz favori ürününüz bulunmuyor',
+    noFavoritesDesc: 'Kalp ikonuna tıklayarak ürünleri favorilerinize ekleyebilirsiniz.',
+    tryDifferentKeywords: '💡 İpucu: Aramanızı genişletmek için daha kısa kelimeler deneyin',
+    
+    // Toast messages
+    addedToFavorites: 'favorilere eklendi!',
+    removedFromFavorites: 'favorilerden çıkarıldı',
+    
+    // Redirect card (home mode)
+    redirectBadge: 'Sınırları Keşfedin',
+    redirectTitle: 'Tam\nKatalog',
+    redirectDesc: 'Bebek ve çocuk modasında en trend 100\'den fazla model sizi bekliyor.',
+    redirectButton: 'Hemen İncele',
+    redirectLink: '/urunler',
+    redirectName: 'Tüm Ürünler',
+    
+    // Modal
+    whatsappModal: 'WhatsApp\'tan Sor',
+    colors: 'Renkler',
+    sizes: 'Bedenler',
+    
+    // WhatsApp messages
+    whatsappCard: 'Merhaba, {code} kodlu ürün hakkında bilgi almak istiyorum.',
+    whatsappModalFull: 'Merhaba, {code} kodlu "{name}" ürünü hakkında bilgi almak istiyorum.',
+    
+    // Error
+    loadError: 'Ürünler yüklenirken hata oluştu'
+  },
+  en: {
+    // Section titles
+    sectionTitleHome: 'Latest Arrivals',
+    sectionTitleFull: 'Product Catalog',
+    collectionBadge: '2026 Collection',
+    sectionDescHome: 'Some of our newest products',
+    sectionDescFull: 'Explore our baby and children socks',
+    
+    // Filters
+    all: 'All',
+    baby: 'Baby Socks',
+    child: 'Kids Socks',
+    favorites: 'Favorites',
+    searchPlaceholder: 'Search by code or name... (e.g. KOD-14)',
+    productsFound: 'products found',
+    
+    // Buttons
+    gridView: 'Wide Card View',
+    listView: 'Compact List View',
+    askQuestion: 'Ask Question',
+    getQuote: 'Get Quote',
+    goToCatalog: 'Go to Catalog',
+    productsCount: '+ products',
+    
+    // Pagination
+    previous: 'Previous',
+    next: 'Next',
+    pageInfo: '. page - Total',
+    productsWord: 'products',
+    
+    // Empty state
+    noResults: 'No products match your search',
+    noResultsDesc: 'Clear filters and try again.',
+    clearFilters: 'Clear Filters',
+    noFavorites: 'No favorite products yet',
+    noFavoritesDesc: 'Click the heart icon to add products to favorites.',
+    tryDifferentKeywords: '💡 Tip: Try shorter keywords to broaden your search',
+    
+    // Toast messages
+    addedToFavorites: 'added to favorites!',
+    removedFromFavorites: 'removed from favorites',
+    
+    // Redirect card (home mode)
+    redirectBadge: 'Discover More',
+    redirectTitle: 'Full\nCatalog',
+    redirectDesc: '100+ trendy models in baby and kids fashion waiting for you.',
+    redirectButton: 'Explore Now',
+    redirectLink: '/en/products',
+    redirectName: 'All Products',
+    
+    // Modal
+    whatsappModal: 'Ask on WhatsApp',
+    colors: 'Colors',
+    sizes: 'Sizes',
+    
+    // WhatsApp messages
+    whatsappCard: 'Hello, I would like information about product {code}.',
+    whatsappModalFull: 'Hello, I would like information about product {code} "{name}".',
+    
+    // Error
+    loadError: 'Error loading products'
+  }
+};
+
 // Ana CatalogSection Komponenti
 interface CatalogSectionProps {
   mode?: 'home' | 'full';
+  lang?: 'tr' | 'en';
 }
 
-export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
+export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -763,7 +938,7 @@ export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const productsPerPage = mode === 'home' ? 5 : 12;
+  const productsPerPage = mode === 'home' ? 5 : 10;
 
   // Get URL params on mount
   useEffect(() => {
@@ -785,18 +960,6 @@ export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
   // Debounced arama değeri (300ms gecikme)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // Debug: Log all state changes
-  useEffect(() => {
-    console.log('📊 State changed:', {
-      isLoading,
-      productsLength: products.length,
-      filteredProductsLength: filteredProducts.length,
-      activeCategories,
-      searchQuery,
-      debouncedSearchQuery
-    });
-  });
-
   // JSON'dan ürünleri getir
   useEffect(() => {
     console.log('🚀 Component mounted');
@@ -809,7 +972,7 @@ export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
         setProducts(fetchedProducts);
       } catch (error) {
         console.error('Error loading products:', error);
-        toast.error('Ürünler yüklenirken hata oluştu');
+        toast.error(translations[lang].loadError);
         // Hata durumunda boş dizi ayarla
         setProducts([]);
       } finally {
@@ -824,12 +987,13 @@ export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
     loadProducts();
   }, []);
 
-  // Kategoriler
+  // Kategoriler - Dil bazlı
+  const t = translations[lang];
   const categories = [
-    { id: 'all', label: 'Tümü' },
-    { id: 'bebek', label: 'Bebek Çorapları' },
-    { id: 'cocuk', label: 'Çocuk Çorapları' },
-    ...(mode === 'full' ? [{ id: 'favorites', label: 'Favoriler' }] : [])
+    { id: 'all', label: t.all },
+    { id: 'bebek', label: t.baby },
+    { id: 'cocuk', label: t.child },
+    ...(mode === 'full' ? [{ id: 'favorites', label: t.favorites }] : [])
   ];
 
   // Sayfa yüklendiğinde localStorage'dan favorileri al
@@ -997,319 +1161,381 @@ export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
     return favorites.some(fav => fav.id === productId);
   };
 
+  // Full mode için katalog arka planı ile component
+  const FullModeWithBackground = () => (
+    <div className="relative min-h-screen">
+      {/* Fixed Background Image - Özel Katalog Arka Planı */}
+      <div
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/katalogbackground.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      />
+      
+      {/* Siyah Overlay - Kristal Netliğinde Okunabilirlik */}
+      <div className="fixed inset-0 z-10 bg-black/60"></div>
+      
+      {/* Üst Geçiş - Beyazdan Şeffafa (Navbar'dan Katalog'a) */}
+      <div className="fixed top-0 left-0 right-0 z-15 h-32 pointer-events-none" style={{
+        background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)'
+      }} />
+      
+      {/* Alt Geçiş - Koyudan Şeffafa (Katalog'dan Footer'a) */}
+      <div className="fixed bottom-0 left-0 right-0 z-15 h-40 pointer-events-none" style={{
+        background: 'linear-gradient(to top, rgba(30,41,59,0.5) 0%, rgba(30,41,59,0) 100%)'
+      }} />
+      
+      {/* Content Section */}
+      <section id="urunler" className="relative z-20 py-10 md:py-14">
+        <div className="container mx-auto px-4 sm:px-6">
+          <CatalogContent />
+        </div>
+      </section>
+    </div>
+  );
+
+  // Home mode için basit section
+  const HomeModeSimple = () => (
+    <section id="urunler" className="py-10 md:py-14 pb-16 md:pb-20">
+      <div className="container mx-auto px-4 sm:px-6">
+        <CatalogContent />
+      </div>
+    </section>
+  );
+
+  // Ortak içerik component
+  const CatalogContent = () => (
+    <>
+      {/* Section Header with Layout Switcher */}
+      <motion.div
+        className="text-center mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* Section Header */}
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4">
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold ${
+            mode === 'full' ? 'text-white' : 'text-slate-800'
+          }`} style={mode === 'full' ? { textShadow: '0 2px 8px rgba(0,0,0,0.5)' } : {}}>
+            {mode === 'home' ? t.sectionTitleHome : t.sectionTitleFull}
+          </h2>
+
+          {/* 2026 Koleksiyonu Badge - Sticker Style */}
+          <span className={`inline-block px-3 py-1 text-xs md:text-sm font-semibold rounded-full shadow-lg whitespace-nowrap transform -rotate-3 hover:rotate-0 transition-transform duration-300 ${
+            mode === 'full' ? 'bg-pink-500 text-white' : 'bg-pink-500 text-white'
+          }`} style={mode === 'full' ? { textShadow: '0 1px 4px rgba(0,0,0,0.3)' } : {}}>
+            {t.collectionBadge}
+          </span>
+
+          {/* Layout Switcher - Only for full mode */}
+          {mode === 'full' && (
+            <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-lg border border-slate-200 p-1 shadow-md">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-pink-500 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+                title={t.gridView}
+              >
+                <HiOutlineViewGrid className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-pink-500 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+                title={t.listView}
+              >
+                <HiBars3 className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+        <p className={`text-lg max-w-2xl mx-auto ${
+          mode === 'full' ? 'text-white/90' : 'text-slate-600'
+        }`} style={mode === 'full' ? { textShadow: '0 1px 4px rgba(0,0,0,0.5)' } : {}}>
+          {mode === 'home' ? t.sectionDescHome : t.sectionDescFull}
+        </p>
+      </motion.div>
+
+      {/* Filter Bar */}
+      <div className={`${mode === 'home' ? 'max-w-lg' : 'max-w-xl'} mx-auto mb-8`}>
+        {/* Arama Kutusu */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <div className="relative">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              className={`w-full pl-12 pr-4 py-4 backdrop-blur-sm border rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-lg transition-all placeholder:text-slate-400 ${
+                mode === 'full'
+                  ? 'bg-white/10 border-white/30 text-white placeholder:text-white/60'
+                  : 'bg-white/90 border-slate-200 text-slate-800'
+              }`}
+            />
+            {/* Arama göstergesi */}
+            {searchQuery && searchQuery !== debouncedSearchQuery && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Filtre Butonları */}
+        <motion.div
+          className="mt-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className={`flex justify-center gap-1.5 md:gap-3 overflow-x-auto overflow-y-hidden pb-2 flex-nowrap scroll-smooth scrollbar-hide ${
+            mode === 'full' ? 'px-4 -mx-4' : 'px-4 -mx-4'
+          } w-full`}>
+            {categories.map((cat) => (
+              <motion.button
+                key={cat.id}
+                onClick={() => toggleCategory(cat.id)}
+                className={`flex-shrink-0 px-2 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 whitespace-nowrap backdrop-blur-sm ${
+                  isCategoryActive(cat.id)
+                    ? 'bg-pink-500/95 text-white shadow-lg'
+                    : mode === 'full'
+                    ? 'bg-white/10 text-white/80 border border-white/30 hover:border-pink-300 hover:text-white shadow-md hover:shadow-lg'
+                    : 'bg-white/90 text-slate-600 border border-slate-200 hover:border-pink-300 hover:text-pink-500 shadow-md hover:shadow-lg'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {cat.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Sonuç Sayısı - Only for full mode */}
+      {mode === 'full' && (
+        <motion.div
+          className="text-center mb-6 relative z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <p className={`text-sm font-medium ${
+            mode === 'full' ? 'text-white/90' : 'text-slate-700'
+          }`} style={mode === 'full' ? { textShadow: '0 1px 4px rgba(0,0,0,0.5)' } : {}}>
+            <AnimatedCounter value={filteredProducts.length} /> {t.productsFound}
+          </p>
+        </motion.div>
+      )}
+
+      {/* Ürün Grid/List - Dinamik Görünüm */}
+      {isLoading ? (
+        <motion.div
+          className={`${
+            mode === 'home'
+              ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
+              : viewMode === 'grid'
+              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
+              : 'space-y-3 max-w-4xl mx-auto'
+          }`}
+          style={mode === 'full' ? { textShadow: '0 1px 3px rgba(0,0,0,0.3)' } : {}}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {[...Array(mode === 'home' ? 4 : 6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </motion.div>
+      ) : filteredProducts.length === 0 ? (
+        <div key="empty" className="text-center py-16">
+          <h3 className="text-xl font-semibold text-slate-700 mb-2">
+            {t.noResults}
+          </h3>
+          <p className="text-slate-500">
+            {t.noResultsDesc}
+          </p>
+          <button
+            onClick={() => {
+              setActiveCategories([]);
+              setSearchQuery('');
+            }}
+            className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+          >
+            {t.clearFilters}
+          </button>
+        </div>
+      ) : (
+        <motion.div
+          className={`${
+            mode === 'home'
+              ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
+              : viewMode === 'grid'
+              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
+              : 'space-y-3 max-w-4xl mx-auto'
+          }`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {displayedProducts.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              index={index}
+              isFavorite={isFavorite(product.id)}
+              viewMode={mode === 'home' ? 'grid' : viewMode}
+              onToggleFavorite={toggleFavorite}
+              onQuickView={setSelectedProduct}
+              lang={lang}
+            />
+          ))}
+        </motion.div>
+      )}
+
+      {/* "Daha Fazla Gör" Butonu - Sadece ana sayfa için */}
+      {mode === 'home' && !isLoading && filteredProducts.length > 4 && (
+        <motion.div
+          className="text-center mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <motion.a
+            href={t.redirectLink}
+            className="inline-flex items-center gap-3 px-8 py-4 bg-white text-pink-500 text-lg font-semibold rounded-full border-2 border-pink-500 shadow-md hover:bg-pink-50 transition-colors"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <span>{t.goToCatalog}</span>
+            <span className="text-sm text-pink-400">({filteredProducts.length}{t.productsCount})</span>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </motion.a>
+        </motion.div>
+      )}
+
+      {/* Sayfalama (Pagination) - Only for full mode */}
+      {mode === 'full' && !isLoading && filteredProducts.length > productsPerPage && (
+        <motion.div
+          className="flex flex-col items-center gap-4 mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          {/* Sayfa Navigasyonu */}
+          <div className="flex items-center gap-2">
+            {/* Önceki Sayfa */}
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                currentPage === 1
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+              }`}
+            >
+              {t.previous}
+            </button>
+
+            {/* Sayfa Numaraları */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                      pageNum === currentPage
+                        ? 'bg-pink-500 text-white'
+                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Sonraki Sayfa */}
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                currentPage === totalPages
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+              }`}
+            >
+              {t.next}
+            </button>
+          </div>
+
+          {/* Sayfa Bilgisi */}
+          <p className={`text-sm ${
+            mode === 'full' ? 'text-white/70' : 'text-slate-500'
+          }`}>
+            {currentPage}{t.pageInfo} {filteredProducts.length} {t.productsWord}
+          </p>
+        </motion.div>
+      )}
+    </>
+  );
   
   return (
     <>
       <Toaster position="top-center" />
       
-      <section id="urunler" className={`py-10 md:py-14 bg-gray-50 ${mode === 'home' ? 'pb-16 md:pb-20' : ''}`}>
-        <div className="container mx-auto px-4">
-          {/* Section Header with Layout Switcher */}
-          <motion.div
-            className="text-center mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-          {/* Section Header */}
-          <div className={`flex items-center justify-center gap-3 mb-4 ${mode === 'home' ? '' : ''}`}>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800">
-              {mode === 'home' ? 'Son Eklenenler' : 'Ürün Kataloğu'}
-            </h2>
+      {mode === 'full' ? <FullModeWithBackground /> : <HomeModeSimple />}
 
-              {/* 2026 Koleksiyonu Badge - Her iki modda da */}
-              <span className={`inline-block px-4 py-2 text-sm font-semibold rounded-lg ${
-                mode === 'home'
-                  ? 'bg-pink-500 text-white shadow-lg whitespace-nowrap transform -rotate-2 hover:rotate-0 transition-transform duration-300'
-                  : 'bg-pink-50 border border-pink-200 text-pink-600'
-              }`}>
-                2026 Koleksiyonu
-              </span>
-
-              {/* Layout Switcher - Only for full mode */}
-              {mode === 'full' && (
-                <div className="flex items-center bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-md transition-colors ${
-                      viewMode === 'grid'
-                        ? 'bg-pink-500 text-white'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                    title="Geniş Kart Görünümü"
-                  >
-                    <HiOutlineViewGrid className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-md transition-colors ${
-                      viewMode === 'list'
-                        ? 'bg-pink-500 text-white'
-                        : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                    title="Kompakt Liste Görünümü"
-                  >
-                    <HiBars3 className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
-            </div>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              {mode === 'home' ? 'En yeni ürünlerimizden bazıları' : 'Bebek ve çocuk çoraplarımızı inceleyin'}
-            </p>
-          </motion.div>
-
-          {/* Filter Bar */}
-          <div className={`${mode === 'home' ? 'max-w-lg' : 'max-w-xl'} mx-auto mb-8`}>
-              {/* Arama Kutusu */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                <div className="relative">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Ürün kodu veya isim ara... (örn: KOD-14)"
-                    className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm transition-all placeholder:text-slate-400"
-                  />
-                  {/* Arama göstergesi */}
-                  {searchQuery && searchQuery !== debouncedSearchQuery && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-
-              {/* Filtre Butonları */}
-              <motion.div
-                className="mt-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <div className="flex justify-center gap-2 md:gap-3 overflow-x-auto pb-2 px-4 -mx-4 scrollbar-hide">
-                  {categories.map((cat) => (
-                    <motion.button
-                      key={cat.id}
-                      onClick={() => toggleCategory(cat.id)}
-                      className={`flex-shrink-0 px-4 md:px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
-                        isCategoryActive(cat.id)
-                          ? 'bg-pink-500 text-white shadow-md'
-                          : 'bg-white text-slate-600 border border-slate-200 hover:border-pink-300 hover:text-pink-500'
-                      }`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {cat.label}
-                    </motion.button>
-                  ))}
-                </div>
-              </motion.div>
-          </div>
-
-          {/* Sonuç Sayısı - Only for full mode */}
-          {mode === 'full' && (
-            <motion.div
-              className="text-center mb-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <p className="text-slate-500 text-sm font-medium">
-                <AnimatedCounter value={filteredProducts.length} /> ürün bulundu
-              </p>
-            </motion.div>
-          )}
-
-          {/* Ürün Grid/List - Dinamik Görünüm */}
-          {isLoading ? (
-            <motion.div
-              className={`${
-                mode === 'home'
-                  ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
-                  : viewMode === 'grid'
-                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
-                  : 'space-y-3 max-w-4xl mx-auto'
-              }`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {[...Array(mode === 'home' ? 4 : 6)].map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </motion.div>
-            ) : filteredProducts.length === 0 ? (
-              <div key="empty" className="text-center py-16">
-                <h3 className="text-xl font-semibold text-slate-700 mb-2">
-                  Aramanızla eşleşen ürün bulunamadı
-                </h3>
-                <p className="text-slate-500">
-                  Filtreleri temizleyip tekrar deneyin.
-                </p>
-                <button
-                  onClick={() => {
-                    setActiveCategories([]);
-                    setSearchQuery('');
-                  }}
-                  className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
-                >
-                  Filtreleri Temizle
-                </button>
-              </div>
-          ) : (
-            <motion.div
-              className={`${
-                mode === 'home'
-                  ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
-                  : viewMode === 'grid'
-                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
-                  : 'space-y-3 max-w-4xl mx-auto'
-              }`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {displayedProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  isFavorite={isFavorite(product.id)}
-                  viewMode={mode === 'home' ? 'grid' : viewMode}
-                  onToggleFavorite={toggleFavorite}
-                  onQuickView={setSelectedProduct}
-                />
-              ))}
-            </motion.div>
-          )}
-
-          {/* "Daha Fazla Gör" Butonu - Sadece ana sayfa için */}
-          {mode === 'home' && !isLoading && filteredProducts.length > 4 && (
-            <motion.div
-              className="text-center mt-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <motion.a
-                href="/urunler"
-                className="inline-flex items-center gap-3 px-8 py-4 bg-white text-pink-500 text-lg font-semibold rounded-full border-2 border-pink-500 shadow-md hover:bg-pink-50 transition-colors"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span>Kataloğa Git</span>
-                <span className="text-sm text-pink-400">({filteredProducts.length}+ ürün)</span>
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </motion.a>
-            </motion.div>
-          )}
-
-          {/* Sayfalama (Pagination) - Only for full mode */}
-          {mode === 'full' && !isLoading && filteredProducts.length > productsPerPage && (
-            <motion.div
-              className="flex flex-col items-center gap-4 mt-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              {/* Sayfa Navigasyonu */}
-              <div className="flex items-center gap-2">
-                {/* Önceki Sayfa */}
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === 1
-                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                      : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                  }`}
-                >
-                  Önceki
-                </button>
-
-                {/* Sayfa Numaraları */}
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (currentPage <= 3) {
-                      pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
-                    }
-
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                          pageNum === currentPage
-                            ? 'bg-pink-500 text-white'
-                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Sonraki Sayfa */}
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === totalPages
-                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                      : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                  }`}
-                >
-                  Sonraki
-                </button>
-              </div>
-
-              {/* Sayfa Bilgisi */}
-              <p className="text-sm text-slate-500">
-                {currentPage}. sayfa - Toplam {filteredProducts.length} ürün
-              </p>
-            </motion.div>
-          )}
-
-        </div>
-
-        {/* Quick View Modal */}
-        <AnimatePresence>
-          {selectedProduct && (
-            <QuickViewModal
-              product={selectedProduct}
-              products={mode === 'home' ? filteredProducts.slice(0, 5) : filteredProducts}
-              onClose={() => setSelectedProduct(null)}
-              onNavigate={setSelectedProduct}
-              isFavorite={isFavorite(selectedProduct.id)}
-              onToggleFavorite={toggleFavorite}
-              mode={mode}
-            />
-          )}
-        </AnimatePresence>
-      </section>
-
+      {/* Quick View Modal */}
+      <AnimatePresence>
+        {selectedProduct && (
+          <QuickViewModal
+            product={selectedProduct}
+            products={mode === 'home' ? filteredProducts.slice(0, 5) : filteredProducts}
+            onClose={() => setSelectedProduct(null)}
+            onNavigate={setSelectedProduct}
+            isFavorite={isFavorite(selectedProduct.id)}
+            onToggleFavorite={toggleFavorite}
+            mode={mode}
+            lang={lang}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

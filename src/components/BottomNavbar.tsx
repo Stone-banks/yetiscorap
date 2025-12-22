@@ -15,7 +15,7 @@ export default function BottomNavbar({ onSearchClick, favoritesCount }: BottomNa
 
   // Instagram ve konum bilgileri
   const instagramUrl = 'https://www.instagram.com/yetiscorap/';
-  const googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=41.043889,28.88469';
+  const googleMapsUrl = 'https://maps.app.goo.gl/s4TyJvp8L4dCikNL8';
   const favoritesUrl = '/favoriler';
   const whatsappUrl = 'https://wa.me/905369205969?text=Merhaba%2C%20%C3%BCr%C3%BCnleriniz%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.';
 
@@ -89,7 +89,7 @@ export default function BottomNavbar({ onSearchClick, favoritesCount }: BottomNa
     <AnimatePresence>
       {isVisible && (
         <motion.nav
-          className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
+          className="fixed bottom-0 left-0 right-0 z-20 md:hidden"
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}

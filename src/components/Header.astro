@@ -51,13 +51,13 @@ const whatsappMsg = lang === 'tr'
 
 <!-- Header - Sticky + Glass Effect -->
 <header class="header-main sticky top-0 z-40 transition-all duration-300" id="mainHeader">
-  <nav class="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
+  <nav class="container mx-auto px-3 sm:px-4 h-16 md:h-20 flex items-center justify-between">
     <!-- Logo -->
-    <a href={lang === 'tr' ? '/' : '/en'} class="flex-shrink-0 relative z-10">
+    <a href={lang === 'tr' ? '/' : '/en'} class="flex-shrink-0 relative z-10 pr-2">
       <img
         src="/yetiscoraplogo.png"
         alt="Yetiş Çorap"
-        class="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform duration-200 hover:scale-105"
+        class="h-8 sm:h-10 md:h-14 w-[110px] sm:w-[120px] md:w-auto object-contain transition-transform duration-200 hover:scale-105"
         width="140"
         height="56"
       />
@@ -230,12 +230,25 @@ const whatsappMsg = lang === 'tr'
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    /* Pastel pattern arka plan - %5 opaklık */
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23EC4899' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233B82F6' fill-opacity='0.03'%3E%3Cpath d='M30 30l15-15 2 2-15 15-2-2zm0 0L15 45l-2-2 15-15 2 2zm0-30L15 15l-2-2 15-15 2 2zm0 0l15-15 2 2-15 15-2-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
   
   /* Header Scrolled State */
   .header-main.scrolled {
     background: rgba(255, 255, 255, 0.98);
     box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
+    /* Logo glow efekti - artırılmış */
+  }
+  
+  .header-main.scrolled a img {
+    filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.15));
+  }
+  
+  /* Logo glow efekti - normal durumda da */
+  .header-main a img {
+    filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.1));
   }
 </style>
 
