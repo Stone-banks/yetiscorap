@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "code": "KOD-01",
+    "name": "Dantelli Kız Bebek Çorabı",
+    "category": "bebek",
+    "ageRange": "0-6 Ay",
+    "image": "/urunler/0-6ay.jpg"
+  },
+  {
+    "id": 2,
+    "code": "KOD-02",
+    "name": "Fırfırlı Bebek Patik",
+    "category": "bebek",
+    "ageRange": "6-12 Ay",
+    "image": "/urunler/6-12ay.jpg"
+  },
+
+  {
+    "id": 7,
+    "code": "KOD-07",
+    "name": "1-2 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "1-2 Yaş",
+    "image": "/urunler/1-2yas.jpg"
+  },
+  {
+    "id": 8,
+    "code": "KOD-08",
+    "name": "2-3 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "2-3 Yaş",
+    "image": "/urunler/2-3yas.jpg"
+  },
+  {
+    "id": 9,
+    "code": "KOD-09",
+    "name": "3-4 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "3-4 Yaş",
+    "image": "/urunler/3-4yas.jpg"
+  },
+  {
+    "id": 10,
+    "code": "KOD-10",
+    "name": "4-5 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "4-5 Yaş",
+    "image": "/urunler/4-5yas.jpg"
+  },
+  {
+    "id": 11,
+    "code": "KOD-11",
+    "name": "5-6 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "5-6 Yaş",
+    "image": "/urunler/5-6yas.jpg"
+  },
+  {
+    "id": 12,
+    "code": "KOD-12",
+    "name": "6-7 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "6-7 Yaş",
+    "image": "/urunler/6-7yas.jpg"
+  },
+  {
+    "id": 13,
+    "code": "KOD-13",
+    "name": "7-8 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "7-8 Yaş",
+    "image": "/urunler/7-8yas.jpg"
+  },
+  {
+    "id": 14,
+    "code": "KOD-14",
+    "name": "8-9 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "8-9 Yaş",
+    "image": "/urunler/8-9yas.jpg"
+  },
+  {
+    "id": 15,
+    "code": "KOD-15",
+    "name": "9-10 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "9-10 Yaş",
+    "image": "/urunler/9-10.jpg"
+  },
+  {
+    "id": 16,
+    "code": "KOD-16",
+    "name": "10-11 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "10-11 Yaş",
+    "image": "/urunler/10-11yas.jpg"
+  },
+  {
+    "id": 17,
+    "code": "KOD-17",
+    "name": "11-12 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "11-12 Yaş",
+    "image": "/urunler/11-12yas.jpg"
+  }
+]

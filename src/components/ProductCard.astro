@@ -78,7 +78,6 @@ const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(what
       <span class="badge badge-pink">{categoryLabel}</span>
       <span class="badge badge-blue">{data.sku}</span>
     </div>
-
     <h3 class="min-w-0 text-sm sm:text-base font-semibold leading-snug text-slate-900 group-hover:text-brand-pink transition-colors line-clamp-2">
       <a href={productURL} class="block">
         {data.title}
@@ -108,7 +107,7 @@ const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(what
       </ul>
     )}
 
-    {showQuoteCta ? (
+    {showQuoteCta && (
         <a
           href={whatsappURL}
           target="_blank"

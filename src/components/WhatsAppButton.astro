@@ -132,13 +132,11 @@ const iconSizes = {
     transform: scale(1.05);
   }
 
-  /* Mobil için daha büyük touch target */
-  @media (max-width: 640px) {
+  /* Mobil cihazlarda FAB tamamen gizli (Tailwind hidden md:flex class sayesinde) */
+  /* Bu media query sadece FAB'ın mobilde olduğundan emin olmak için */
+  @media (max-width: 767px) {
     .whatsapp-fab {
-      width: 56px;
-      height: 56px;
-      bottom: max(16px, env(safe-area-inset-bottom, 16px));
-      right: max(16px, env(safe-area-inset-right, 16px));
+      display: none !important;
     }
   }
 
