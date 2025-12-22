@@ -17,6 +17,11 @@ export default defineConfig({
   // Site URL (production için güncellenecek)
   site: 'https://yetiscorap.com',
 
+  // Dev Toolbar devre dışı bırak
+  devToolbar: {
+    enabled: false
+  },
+
   // i18n Konfigürasyonu
   i18n: {
     defaultLocale: 'tr',

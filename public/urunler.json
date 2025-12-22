@@ -71,5 +71,37 @@
     "category": "cocuk",
     "ageRange": "7-8 Yaş",
     "image": "/urunler/7-8yas.jpg"
+  },
+  {
+    "id": 14,
+    "code": "KOD-14",
+    "name": "8-9 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "8-9 Yaş",
+    "image": "/urunler/8-9yas.jpg"
+  },
+  {
+    "id": 15,
+    "code": "KOD-15",
+    "name": "9-10 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "9-10 Yaş",
+    "image": "/urunler/9-10.jpg"
+  },
+  {
+    "id": 16,
+    "code": "KOD-16",
+    "name": "10-11 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "10-11 Yaş",
+    "image": "/urunler/10-11yas.jpg"
+  },
+  {
+    "id": 17,
+    "code": "KOD-17",
+    "name": "11-12 Yaş Çocuk Çorabı",
+    "category": "cocuk",
+    "ageRange": "11-12 Yaş",
+    "image": "/urunler/11-12yas.jpg"
   }
 ]

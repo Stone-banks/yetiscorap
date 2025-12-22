@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
-import { HiOutlineHeart, HiHeart, HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
+import { HiOutlineHeart, HiHeart, HiChevronLeft, HiChevronRight, HiBars3 } from 'react-icons/hi2';
+import { HiOutlineViewGrid } from 'react-icons/hi';
 import toast, { Toaster } from 'react-hot-toast';
 
 // Ürün tipi
@@ -87,13 +88,35 @@ interface ProductCardProps {
   product: Product;
   index: number;
   isFavorite: boolean;
+  viewMode: 'grid' | 'list';
   onToggleFavorite: (product: Product) => void;
   onQuickView: (product: Product) => void;
 }
 
-const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView }: ProductCardProps) => {
+const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, onQuickView }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (imageRef.current) {
+      observer.observe(imageRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -130,37 +153,56 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="product-card group bg-white rounded-lg sm:rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg cursor-pointer relative transition-shadow duration-300"
+      className={`product-card group bg-white rounded-lg sm:rounded-xl overflow-hidden border shadow-sm hover:shadow-lg cursor-pointer relative transition-all duration-300 ${
+        viewMode === 'list'
+          ? 'flex items-center gap-4 p-4'
+          : 'border-slate-100'
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onQuickView(product)}
-      whileHover={{ y: -4 }}
+      whileHover={{ y: viewMode === 'list' ? 0 : -4, scale: 1 }}
       whileTap={{ scale: 0.98 }}
     >
+
       {/* Ürün Görseli */}
-      <div className="relative aspect-square overflow-hidden bg-slate-100">
-        <motion.img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          animate={{ scale: isHovered ? 1.05 : 1 }}
-          transition={{ duration: 0.3 }}
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = '/images/placeholder.png';
-          }}
-        />
+      <div ref={imageRef} className={`relative overflow-hidden bg-slate-100 ${
+        viewMode === 'list' ? 'w-24 h-24 sm:w-28 sm:h-28 rounded-lg' : 'aspect-square'
+      }`}>
+        {/* Loading Placeholder */}
+        {!isImageLoaded && (
+          <div className="absolute inset-0 bg-slate-200 animate-pulse" />
+        )}
 
-        {/* Ürün Kodu Badge - Daha minimal */}
-        <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
-          <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md sm:rounded-full text-[10px] sm:text-xs font-bold bg-pink-500/90 text-white backdrop-blur-sm">
-            {product.code}
-          </span>
-        </div>
+        {/* Lazy Loaded Image */}
+        {inView && (
+          <motion.img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover transition-opacity duration-300"
+            style={{ opacity: isImageLoaded ? 1 : 0 }}
+            animate={{ scale: isHovered && viewMode !== 'list' ? 1.05 : 1 }}
+            transition={{ duration: 0.3 }}
+            onLoad={() => setIsImageLoaded(true)}
+            onError={(e) => {
+              setIsImageLoaded(true);
+              (e.target as HTMLImageElement).src = '/images/placeholder.png';
+            }}
+          />
+        )}
 
-        {/* Favori Butonu - Daha minimal */}
+        {/* Ürün Kodu Badge */}
+        {viewMode !== 'list' && (
+          <div className="absolute top-2 left-2">
+            <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md sm:rounded-full text-[10px] sm:text-xs font-bold bg-pink-500/90 text-white backdrop-blur-sm">
+              {product.code}
+            </span>
+          </div>
+        )}
+
+        {/* Favori Butonu */}
         <motion.button
-          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10"
+          className="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm z-10"
           onClick={handleFavoriteClick}
           whileTap={{ scale: 1.3 }}
         >
@@ -186,19 +228,46 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
         </motion.button>
       </div>
 
-      {/* Ürün Bilgileri - Mobil için optimize */}
-      <div className="p-2 sm:p-3">
-        <h3 className="font-semibold text-slate-800 text-xs sm:text-sm leading-tight mb-0.5 sm:mb-1 line-clamp-1 sm:line-clamp-2">
-          {product.name}
-        </h3>
-        <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">{product.ageRange}</p>
+      {/* Ürün Bilgileri */}
+      <div className={`${
+        viewMode === 'list'
+          ? 'flex-1 flex items-center justify-between'
+          : 'p-2 sm:p-3'
+      }`}>
+        <div className={viewMode === 'list' ? 'flex-1' : ''}>
+          {/* Product Code for List View */}
+          {viewMode === 'list' && (
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-1 bg-pink-500/10 text-pink-500 text-xs font-bold rounded-md">
+                {product.code}
+              </span>
+              <span className="text-xs text-slate-500">{product.ageRange}</span>
+            </div>
+          )}
 
-        {/* Soru Sor Butonu - Mobil için kompakt */}
+          <h3 className={`font-semibold text-slate-800 leading-tight mb-0.5 sm:mb-1 line-clamp-${
+            viewMode === 'list' ? '1' : '1 sm:2'
+          } ${
+            viewMode === 'list' ? 'text-base' : 'text-xs sm:text-sm'
+          }`}>
+            {product.name}
+          </h3>
+
+          {viewMode !== 'list' && (
+            <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">{product.ageRange}</p>
+          )}
+        </div>
+
+        {/* Soru Sor Butonu */}
         <motion.a
           href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Merhaba, ${product.code} kodlu ürün hakkında bilgi almak istiyorum.`)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-2 sm:py-2.5 bg-green-500 text-white text-[10px] sm:text-xs font-semibold rounded-md sm:rounded-lg flex items-center justify-center gap-1 sm:gap-1.5 relative overflow-hidden"
+          className={`bg-green-500 text-white font-semibold rounded-lg flex items-center justify-center gap-1.5 relative overflow-hidden transition-all ${
+            viewMode === 'list'
+              ? 'px-4 py-2 text-sm'
+              : 'w-full py-2 sm:py-2.5 text-[10px] sm:text-xs'
+          }`}
           onClick={(e) => e.stopPropagation()}
           whileHover={{ backgroundColor: '#16a34a' }}
           whileTap={{ scale: 0.95 }}
@@ -206,8 +275,7 @@ const ProductCard = ({ product, index, isFavorite, onToggleFavorite, onQuickView
           <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
-          <span className="hidden sm:inline">Soru Sor</span>
-          <span className="sm:hidden">Sor</span>
+          <span>{viewMode === 'list' ? 'Teklif Al' : 'Soru Sor'}</span>
         </motion.a>
       </div>
     </motion.article>
@@ -222,31 +290,62 @@ interface QuickViewModalProps {
   onNavigate: (product: Product) => void;
   isFavorite: boolean;
   onToggleFavorite: (product: Product) => void;
+  mode?: 'home' | 'full';
 }
 
-const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, onToggleFavorite }: QuickViewModalProps) => {
+const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, onToggleFavorite, mode = 'full' }: QuickViewModalProps) => {
   const [direction, setDirection] = useState(0);
   const [imageKey, setImageKey] = useState(0);
+  const [showRedirectCard, setShowRedirectCard] = useState(false);
 
   if (!product) return null;
 
   // Mevcut ürünün index'ini bul
   const currentIndex = products.findIndex(p => p.id === product.id);
 
-  // Önceki ürüne git (infinite loop)
+  // Önceki ürüne git (infinite loop for full mode, limited for home)
   const handlePrev = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+    setShowRedirectCard(false);
     setDirection(-1);
-    const prevIndex = currentIndex <= 0 ? products.length - 1 : currentIndex - 1;
+    let prevIndex: number;
+
+    if (mode === 'home') {
+      // Home mode: don't loop, just go to previous
+      prevIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+    } else {
+      // Full mode: infinite loop
+      prevIndex = currentIndex <= 0 ? products.length - 1 : currentIndex - 1;
+    }
+
     setImageKey(prev => prev + 1);
     onNavigate(products[prevIndex]);
   };
 
-  // Sonraki ürüne git (infinite loop)
+  // Sonraki ürüne git (limited for home mode)
   const handleNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+
+    if (mode === 'home') {
+      // Check if we're at the last product in home mode (max 5)
+      if (currentIndex >= products.length - 1 || currentIndex >= 4) {
+        setShowRedirectCard(true);
+        return;
+      }
+    }
+
+    setShowRedirectCard(false);
     setDirection(1);
-    const nextIndex = currentIndex >= products.length - 1 ? 0 : currentIndex + 1;
+    let nextIndex: number;
+
+    if (mode === 'home') {
+      // Home mode: don't loop
+      nextIndex = currentIndex >= products.length - 1 ? currentIndex : currentIndex + 1;
+    } else {
+      // Full mode: infinite loop
+      nextIndex = currentIndex >= products.length - 1 ? 0 : currentIndex + 1;
+    }
+
     setImageKey(prev => prev + 1);
     onNavigate(products[nextIndex]);
   };
@@ -257,7 +356,10 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
     if (info.offset.x > swipeThreshold) {
       handlePrev();
     } else if (info.offset.x < -swipeThreshold) {
-      handleNext();
+      // Don't allow swipe if we're showing redirect card
+      if (!showRedirectCard) {
+        handleNext();
+      }
     }
   };
 
@@ -265,12 +367,12 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowRight' && !showRedirectCard) handleNext();
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, products]);
+  }, [currentIndex, products, showRedirectCard]);
 
   // Image animation variants
   const imageVariants = {
@@ -370,9 +472,12 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
               {/* Prev Button */}
               <motion.button
                 onClick={handlePrev}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all"
+                className={`absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all ${
+                  mode === 'home' && currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                disabled={mode === 'home' && currentIndex === 0}
               >
                 <HiChevronLeft className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
               </motion.button>
@@ -380,14 +485,68 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
               {/* Next Button */}
               <motion.button
                 onClick={handleNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all"
+                className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all ${
+                  mode === 'home' && (currentIndex >= products.length - 1 || currentIndex >= 4) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                disabled={mode === 'home' && (currentIndex >= products.length - 1 || currentIndex >= 4)}
               >
                 <HiChevronRight className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
               </motion.button>
             </>
           )}
+
+          {/* Redirect Card Overlay - Only for home mode */}
+          <AnimatePresence>
+            {showRedirectCard && mode === 'home' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-pink-500 to-pink-400 z-30 flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  className="text-center text-white p-8 max-w-sm mx-4"
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                >
+                  {/* Icon */}
+                  <div className="w-24 h-24 mx-auto mb-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                    <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+
+                  {/* Title */}
+                  <h2 className="text-2xl font-bold mb-3">
+                    Daha Fazla Model
+                  </h2>
+                  <h3 className="text-lg font-light mb-6 opacity-90">
+                    ve Detay Keşfedin
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm mb-8 opacity-80 leading-relaxed">
+                    Tüm kataloğumuzda 100'den fazla bebek ve çocuk çorap modeli sizi bekliyor
+                  </p>
+
+                  {/* Button */}
+                  <a
+                    href="/urunler"
+                    onClick={onClose}
+                    className="inline-flex items-center gap-3 px-8 py-4 bg-white text-pink-500 font-bold rounded-full hover:bg-gray-50 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                  >
+                    <span>Tüm Ürünlere Git</span>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Product Code Badge */}
           <div className="absolute bottom-4 left-4 z-10">
@@ -397,23 +556,24 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
           </div>
 
           {/* Page Indicator */}
-          {products.length > 1 && (
+          {products.length > 1 && !showRedirectCard && (
             <div className="absolute bottom-4 right-4 z-10">
               <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/50 text-white backdrop-blur-sm">
-                {currentIndex + 1} / {products.length}
+                {currentIndex + 1} / {mode === 'home' ? Math.min(products.length, 5) : products.length}
               </span>
             </div>
           )}
         </div>
 
         {/* Product Details */}
-        <motion.div
-          className="p-6"
-          key={product.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-        >
+        {!showRedirectCard && (
+          <motion.div
+            className="p-6"
+            key={product.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
           <h2 className="text-xl font-bold text-slate-800 mb-2">{product.name}</h2>
           <p className="text-sm text-slate-500 mb-4">{product.ageRange}</p>
 
@@ -464,13 +624,14 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
             WhatsApp'tan Sor
           </motion.a>
         </motion.div>
+        )}
       </motion.div>
     </motion.div>
   );
 };
 
 // Empty State
-const EmptyState = () => (
+const EmptyState = ({ hasFilterFavorites }: { hasFilterFavorites?: boolean }) => (
   <motion.div
     className="text-center py-16"
     initial={{ opacity: 0, y: 20 }}
@@ -479,23 +640,34 @@ const EmptyState = () => (
   >
     <motion.div
       className="w-24 h-24 mx-auto mb-6 text-slate-300"
-      animate={{ 
+      animate={{
         rotate: [0, -10, 10, -10, 0],
         scale: [1, 1.1, 1]
       }}
       transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
     >
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-      </svg>
+      {hasFilterFavorites ? (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+      ) : (
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+      )}
     </motion.div>
     <h3 className="text-xl font-semibold text-slate-700 mb-2">
-      Aramanızla eşleşen ürün bulunamadı
+      {hasFilterFavorites ? 'Henüz favori ürününüz bulunmuyor' : 'Aranızla eşleşen ürün bulunamadı'}
     </h3>
     <p className="text-slate-500 mb-4">
-      Farklı anahtar kelimeler deneyin veya filtreleri temizleyin.
+      {hasFilterFavorites
+        ? 'Kalp ikonuna tıklayarak ürünleri favorilerinize ekleyebilirsiniz.'
+        : 'Farklı anahtar kelimeler deneyin veya filtreleri temizleyin.'
+      }
     </p>
-    <p className="text-sm text-slate-400">💡 İpucu: Aramanızı genişletmek için daha kısa kelimeler deneyin</p>
+    {!hasFilterFavorites && (
+      <p className="text-sm text-slate-400">💡 İpucu: Aramanızı genişletmek için daha kısa kelimeler deneyin</p>
+    )}
   </motion.div>
 );
 
@@ -511,7 +683,7 @@ const AnimatedCounter = ({ value }: { value: number }) => {
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      
+
       const currentValue = Math.round(startValue + (value - startValue) * progress);
       setDisplayValue(currentValue);
 
@@ -535,31 +707,82 @@ const AnimatedCounter = ({ value }: { value: number }) => {
   );
 };
 
+
 // Ana CatalogSection Komponenti
-export default function CatalogSection() {
+interface CatalogSectionProps {
+  mode?: 'home' | 'full';
+}
+
+export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategories, setActiveCategories] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    // Clear any persisted search query on mount
+    return '';
+  });
+  const [activeCategories, setActiveCategories] = useState<string[]>(() => {
+    // Clear any persisted categories on mount
+    return [];
+  });
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const productsPerPage = mode === 'home' ? 5 : 12;
+
+  // Get URL params on mount
+  useEffect(() => {
+    if (mode === 'full') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchFromUrl = urlParams.get('search');
+      const categoryFromUrl = urlParams.get('category');
+      
+      if (searchFromUrl) {
+        setSearchQuery(searchFromUrl);
+      }
+      
+      if (categoryFromUrl && ['bebek', 'cocuk'].includes(categoryFromUrl)) {
+        setActiveCategories([categoryFromUrl]);
+      }
+    }
+  }, [mode]);
 
   // Debounced arama değeri (300ms gecikme)
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
+  // Debug: Log all state changes
+  useEffect(() => {
+    console.log('📊 State changed:', {
+      isLoading,
+      productsLength: products.length,
+      filteredProductsLength: filteredProducts.length,
+      activeCategories,
+      searchQuery,
+      debouncedSearchQuery
+    });
+  });
+
   // JSON'dan ürünleri getir
   useEffect(() => {
+    console.log('🚀 Component mounted');
+
     const loadProducts = async () => {
       try {
+        console.log('📦 Loading products...');
         const fetchedProducts = await fetchProducts();
+        console.log('📦 Products loaded:', fetchedProducts.length);
         setProducts(fetchedProducts);
       } catch (error) {
         console.error('Error loading products:', error);
         toast.error('Ürünler yüklenirken hata oluştu');
+        // Hata durumunda boş dizi ayarla
+        setProducts([]);
       } finally {
         // Minimum loading süresi için
         setTimeout(() => {
+          console.log('✅ Loading complete, setting isLoading to false');
           setIsLoading(false);
         }, 500);
       }
@@ -572,7 +795,8 @@ export default function CatalogSection() {
   const categories = [
     { id: 'all', label: 'Tümü' },
     { id: 'bebek', label: 'Bebek Çorapları' },
-    { id: 'cocuk', label: 'Çocuk Çorapları' }
+    { id: 'cocuk', label: 'Çocuk Çorapları' },
+    ...(mode === 'full' ? [{ id: 'favorites', label: 'Favoriler' }] : [])
   ];
 
   // Sayfa yüklendiğinde localStorage'dan favorileri al
@@ -608,27 +832,21 @@ export default function CatalogSection() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Fake loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Kategori toggle fonksiyonu
+  
+  // Kategori toggle fonksiyonu - Tekli seçim mantığı
   const toggleCategory = (categoryId: string) => {
     if (categoryId === 'all') {
-      // "Tümü" seçildiğinde diğerlerini temizle
+      // "Tümü" seçildiğinde her şeyi temizle
       setActiveCategories([]);
     } else {
+      // Tekli seçim: sadece bir kategori seçilebilir
       setActiveCategories(prev => {
         if (prev.includes(categoryId)) {
-          // Kategori zaten seçili, kaldır
-          return prev.filter(id => id !== categoryId);
+          // Kategori zaten seçili, hepsini temizle (Tümü'ne geri dön)
+          return [];
         } else {
-          // Kategori ekle
-          return [...prev, categoryId];
+          // Yeni kategori seç, diğerlerini temizle
+          return [categoryId];
         }
       });
     }
@@ -644,10 +862,19 @@ export default function CatalogSection() {
 
   // Filtrelenmiş ürünler
   const filteredProducts = useMemo(() => {
+    // Başlangıçta products boş ise, boş dizi dönerek hata önle
+    if (!products || products.length === 0) {
+      return [];
+    }
+
     let result = products;
 
-    // Kategori filtresi (çoklu seçim)
-    if (activeCategories.length > 0) {
+    // Favoriler filtresi
+    if (activeCategories.includes('favorites')) {
+      result = result.filter(product => favorites.some(fav => fav.id === product.id));
+    }
+    // Normal kategori filtresi (tekli seçim)
+    else if (activeCategories.length > 0) {
       result = result.filter(product => activeCategories.includes(product.category));
     }
 
@@ -661,12 +888,42 @@ export default function CatalogSection() {
     }
 
     return result;
-  }, [products, activeCategories, debouncedSearchQuery]);
+  }, [products, activeCategories, debouncedSearchQuery, favorites]);
 
-  // Ana sayfada gösterilecek ürünler (ilk 6)
+  
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategories, debouncedSearchQuery]);
+
+  // Sayfalama için hesaplanan ürünler
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage]);
+
+  // Toplam sayfa sayısı
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  // "Daha Fazla Gör" mantığı için genişletme durumu (sadece ana sayfa için)
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Ana sayfada gösterilecek ürünler (ilk 4 veya 5)
   const displayedProducts = useMemo(() => {
-    return filteredProducts.slice(0, 6);
-  }, [filteredProducts]);
+    if (mode === 'home') {
+      // İlk 4 ürün her zaman gösterilir (2x2 grid)
+      if (!isExpanded) {
+        return filteredProducts.slice(0, 4);
+      }
+      // Genişletilmişse ilk 5 ürünü göster
+      return filteredProducts.slice(0, 5);
+    }
+    // Full modda sayfalama kullanılır
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, isExpanded, mode, currentPage, productsPerPage]);
 
   // Favori toggle
   const toggleFavorite = (product: Product) => {
@@ -684,144 +941,213 @@ export default function CatalogSection() {
     return favorites.some(fav => fav.id === productId);
   };
 
+  
   return (
     <>
       <Toaster position="top-center" />
       
-      <section id="urunler" className="py-16 md:py-24 bg-gray-50 pb-24 md:pb-24">
+      <section id="urunler" className={`py-10 md:py-14 bg-gray-50 ${mode === 'home' ? 'pb-16 md:pb-20' : ''}`}>
         <div className="container mx-auto px-4">
-          {/* Section Header */}
-          <motion.div 
+          {/* Section Header with Layout Switcher */}
+          <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 mb-4">
-              Ürün Kataloğu
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Bebek ve çocuk çoraplarımızı inceleyin
-            </p>
-          </motion.div>
+            {/* 2026 Koleksiyonu Badge - Ana Sayfa */}
+          {mode === 'home' && (
+            <div className="flex justify-center mb-4">
+              <span className="inline-block px-4 py-2 bg-pink-500 text-white text-sm font-bold rounded-lg shadow-lg whitespace-nowrap transform -rotate-2 hover:rotate-0 transition-transform duration-300">
+                2026 Koleksiyonu
+              </span>
+            </div>
+          )}
 
-          {/* Arama Kutusu */}
-          <motion.div 
-            className="max-w-xl mx-auto mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ürün kodu veya isim ara... (örn: KOD-14)"
-                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm transition-all placeholder:text-slate-400"
-              />
-              {/* Arama göstergesi */}
-              {searchQuery && searchQuery !== debouncedSearchQuery && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+          {/* Section Header */}
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800">
+              {mode === 'home' ? 'Son Eklenenler' : 'Ürün Kataloğu'}
+            </h2>
+
+              {/* 2026 Koleksiyonu Badge - Ürünler Sayfası */}
+              {mode === 'full' && (
+                <span className="inline-block px-4 py-2 bg-pink-50 border border-pink-200 text-pink-600 text-sm font-semibold rounded-lg">
+                  2026 Koleksiyonu
+                </span>
+              )}
+
+              {/* Layout Switcher - Only for full mode */}
+              {mode === 'full' && (
+                <div className="flex items-center bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-md transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-pink-500 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                    title="Geniş Kart Görünümü"
+                  >
+                    <HiOutlineViewGrid className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-pink-500 text-white'
+                        : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                    title="Kompakt Liste Görünümü"
+                  >
+                    <HiBars3 className="w-5 h-5" />
+                  </button>
                 </div>
               )}
             </div>
-          </motion.div>
-
-          {/* Filtre Butonları */}
-          <motion.div 
-            className="mb-8 overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <div className="flex justify-center gap-2 md:gap-3 overflow-x-auto pb-2 px-4 -mx-4 scrollbar-hide">
-              {categories.map((cat) => (
-                <motion.button
-                  key={cat.id}
-                  onClick={() => toggleCategory(cat.id)}
-                  className={`flex-shrink-0 px-4 md:px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap flex items-center gap-2 ${
-                    isCategoryActive(cat.id)
-                      ? 'bg-pink-500 text-white shadow-md'
-                      : 'bg-white text-slate-600 border border-slate-200 hover:border-pink-300 hover:text-pink-500'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <span>{cat.label}</span>
-                  {/* Seçili ise checkmark göster */}
-                  {isCategoryActive(cat.id) && cat.id !== 'all' && (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Sonuç Sayısı */}
-          <motion.div 
-            className="text-center mb-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <p className="text-slate-500 text-sm font-medium">
-              <AnimatedCounter value={filteredProducts.length} /> ürün bulundu
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              {mode === 'home' ? 'En yeni ürünlerimizden bazıları' : 'Bebek ve çocuk çoraplarımızı inceleyin'}
             </p>
           </motion.div>
 
-          {/* Ürün Grid - Mobilde 2, Tablette 3, Masaüstünde 4 kolon */}
-          <AnimatePresence mode="wait">
-            {isLoading ? (
+          {/* Filter Bar */}
+          <div className={`${mode === 'home' ? 'max-w-lg' : 'max-w-xl'} mx-auto mb-8`}>
+              {/* Arama Kutusu */}
               <motion.div
-                key="skeleton"
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
               >
-                {[...Array(6)].map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
+                <div className="relative">
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Ürün kodu veya isim ara... (örn: KOD-14)"
+                    className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm transition-all placeholder:text-slate-400"
+                  />
+                  {/* Arama göstergesi */}
+                  {searchQuery && searchQuery !== debouncedSearchQuery && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                  )}
+                </div>
               </motion.div>
-            ) : displayedProducts.length === 0 ? (
-              <EmptyState key="empty" />
-            ) : (
-              <motion.div
-                key="products"
-                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <AnimatePresence>
-                  {displayedProducts.map((product, index) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      index={index}
-                      isFavorite={isFavorite(product.id)}
-                      onToggleFavorite={toggleFavorite}
-                      onQuickView={setSelectedProduct}
-                    />
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* Tüm Kataloğu İncele Butonu */}
-          {filteredProducts.length > 6 && (
+              {/* Filtre Butonları */}
+              <motion.div
+                className="mt-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="flex justify-center gap-2 md:gap-3 overflow-x-auto pb-2 px-4 -mx-4 scrollbar-hide">
+                  {categories.map((cat) => (
+                    <motion.button
+                      key={cat.id}
+                      onClick={() => toggleCategory(cat.id)}
+                      className={`flex-shrink-0 px-4 md:px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap ${
+                        isCategoryActive(cat.id)
+                          ? 'bg-pink-500 text-white shadow-md'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:border-pink-300 hover:text-pink-500'
+                      }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {cat.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+          </div>
+
+          {/* Sonuç Sayısı - Only for full mode */}
+          {mode === 'full' && (
+            <motion.div
+              className="text-center mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p className="text-slate-500 text-sm font-medium">
+                <AnimatedCounter value={filteredProducts.length} /> ürün bulundu
+              </p>
+            </motion.div>
+          )}
+
+          {/* Ürün Grid/List - Dinamik Görünüm */}
+          {isLoading ? (
+            <motion.div
+              className={`${
+                mode === 'home'
+                  ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
+                  : viewMode === 'grid'
+                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
+                  : 'space-y-3 max-w-4xl mx-auto'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {[...Array(mode === 'home' ? 4 : 6)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </motion.div>
+            ) : filteredProducts.length === 0 ? (
+              <div key="empty" className="text-center py-16">
+                <h3 className="text-xl font-semibold text-slate-700 mb-2">
+                  Aramanızla eşleşen ürün bulunamadı
+                </h3>
+                <p className="text-slate-500">
+                  Filtreleri temizleyip tekrar deneyin.
+                </p>
+                <button
+                  onClick={() => {
+                    setActiveCategories([]);
+                    setSearchQuery('');
+                  }}
+                  className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+                >
+                  Filtreleri Temizle
+                </button>
+              </div>
+          ) : (
+            <motion.div
+              className={`${
+                mode === 'home'
+                  ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
+                  : viewMode === 'grid'
+                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
+                  : 'space-y-3 max-w-4xl mx-auto'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {displayedProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  isFavorite={isFavorite(product.id)}
+                  viewMode={mode === 'home' ? 'grid' : viewMode}
+                  onToggleFavorite={toggleFavorite}
+                  onQuickView={setSelectedProduct}
+                />
+              ))}
+            </motion.div>
+          )}
+
+          {/* "Daha Fazla Gör" Butonu - Sadece ana sayfa için */}
+          {mode === 'home' && !isLoading && filteredProducts.length > 4 && (
             <motion.div
               className="text-center mt-8"
               initial={{ opacity: 0, y: 20 }}
@@ -834,14 +1160,89 @@ export default function CatalogSection() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span>Tüm Kataloğu İncele</span>
-                <span className="text-sm text-pink-400">({filteredProducts.length} ürün)</span>
+                <span>Kataloğa Git</span>
+                <span className="text-sm text-pink-400">({filteredProducts.length}+ ürün)</span>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </motion.a>
             </motion.div>
           )}
+
+          {/* Sayfalama (Pagination) - Only for full mode */}
+          {mode === 'full' && !isLoading && filteredProducts.length > productsPerPage && (
+            <motion.div
+              className="flex flex-col items-center gap-4 mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {/* Sayfa Navigasyonu */}
+              <div className="flex items-center gap-2">
+                {/* Önceki Sayfa */}
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === 1
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                  }`}
+                >
+                  Önceki
+                </button>
+
+                {/* Sayfa Numaraları */}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                          pageNum === currentPage
+                            ? 'bg-pink-500 text-white'
+                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Sonraki Sayfa */}
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === totalPages
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                  }`}
+                >
+                  Sonraki
+                </button>
+              </div>
+
+              {/* Sayfa Bilgisi */}
+              <p className="text-sm text-slate-500">
+                {currentPage}. sayfa - Toplam {filteredProducts.length} ürün
+              </p>
+            </motion.div>
+          )}
+
         </div>
 
         {/* Quick View Modal */}
@@ -849,15 +1250,17 @@ export default function CatalogSection() {
           {selectedProduct && (
             <QuickViewModal
               product={selectedProduct}
-              products={filteredProducts}
+              products={mode === 'home' ? filteredProducts.slice(0, 10) : filteredProducts}
               onClose={() => setSelectedProduct(null)}
               onNavigate={setSelectedProduct}
               isFavorite={isFavorite(selectedProduct.id)}
               onToggleFavorite={toggleFavorite}
+              mode={mode}
             />
           )}
         </AnimatePresence>
       </section>
+
     </>
   );
 }

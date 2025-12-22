@@ -4,7 +4,9 @@
       "Bash(npm run dev:*)",
       "Bash(dir \"C:\\\\Users\\\\TheYa\\\\OneDrive\\\\Desktop\\\\yetiscorap\\\\public\\\\images\")",
       "Bash(dir \"C:\\\\Users\\\\TheYa\\\\OneDrive\\\\Desktop\\\\yetiscorap\\\\public\" /s /b)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(dir:*)",
+      "Bash(cat:*)"
     ]
   }
 }

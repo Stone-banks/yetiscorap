@@ -15,6 +15,7 @@ import Footer from '@components/Footer.astro';
 import WhatsAppButton from '@components/WhatsAppButton.astro';
 import CatalogSection from '@components/CatalogSection.tsx';
 import HeaderNav from '@components/HeaderNav.tsx';
+import GoogleReviews from '@components/GoogleReviews.tsx';
 
 // JSON-LD yapısal veri
 const jsonLd = {
@@ -57,48 +58,42 @@ const jsonLd = {
       <!-- Arka Plan Görseli - Mobilde tam görünsün -->
       <div class="absolute inset-0">
         <img
-          src="/dikeyhero.png"
+          src="/dikeyhero.jpg"
           alt="Bebek ve Çocuk Çorapları"
           class="w-full h-full object-cover object-center"
           loading="eager"
         />
         <!-- Koyu Gradyan Overlay - Okunabilirlik için -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/60"></div>
       </div>
 
       <div class="container relative z-10">
-        <div class="max-w-xl mx-auto text-center py-6 md:py-10 -mt-24 md:-mt-28">
-          <!-- Logo + 2026 Rozeti Wrapper -->
-          <div class="relative mb-3 md:mb-4 inline-block">
-            <!-- Logo - Büyütülmüş ve Glow efektli -->
+        <div class="max-w-xl mx-auto text-center py-6 md:py-8 -mt-12 md:-mt-16">
+          <!-- Logo -->
+          <div class="mb-2 md:mb-3 inline-block">
             <img
               src="/yetiscoraplogo.png"
               alt="Yetiş Çorap Logo"
-              class="h-auto w-[180px] sm:w-[200px] brightness-0 invert hero-logo-glow"
-              width="200"
-              height="80"
+              class="h-auto w-[200px] sm:w-[220px] md:w-[240px] brightness-0 invert drop-shadow-2xl"
+              style="filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));"
+              width="240"
+              height="96"
             />
-            <!-- 2026 Koleksiyonu Rozeti -->
-            <div class="absolute -top-2 -right-4 sm:-right-6 rotate-12">
-              <span class="inline-block px-2 py-1 bg-pink-500 text-white text-[9px] sm:text-[10px] font-bold rounded-md shadow-lg whitespace-nowrap">
-                2026 KOLEKSİYONU
-              </span>
-            </div>
           </div>
 
           <!-- H1 Başlık - Toptan Satış Odaklı -->
-          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight mb-2 md:mb-3 drop-shadow-lg">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight mb-1.5 md:mb-2 drop-shadow-lg">
             Türkiye'nin Güvenilir
-            <span class="block text-pink-400 mt-1">Toptan Çorap Tedarikçisi</span>
+            <span class="block text-pink-400 mt-0.5">Toptan Çorap Tedarikçisi</span>
           </h1>
 
           <!-- Alt Açıklama - Wholesaler Copy -->
-          <p class="text-sm sm:text-base md:text-lg text-white/90 mb-3 md:mb-4 leading-relaxed drop-shadow-md max-w-md mx-auto">
+          <p class="text-sm sm:text-base md:text-lg text-white/90 mb-2.5 md:mb-3 leading-relaxed drop-shadow-md max-w-md mx-auto">
             Geniş koleksiyon, sınırsız stok ve hızlı sevkiyat avantajıyla işinizi büyütüyoruz.
           </p>
 
           <!-- Trust Bar - Güven Göstergeleri -->
-          <div class="mb-4 md:mb-5">
+          <div class="mb-3 md:mb-4">
             <p class="text-[10px] sm:text-xs text-white/80 font-light tracking-wider drop-shadow-md">
               HIZLI SEVKİYAT • DEVASA STOK • ÜSTÜN KALİTE
             </p>
@@ -134,10 +129,10 @@ const jsonLd = {
       </div>
 
       <!-- Aşağı Kaydır Animasyonu -->
-      <div class="absolute bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
-        <div class="w-[1px] h-8 bg-gradient-to-b from-transparent via-white/50 to-white/80"></div>
+      <div class="absolute bottom-32 md:bottom-12 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
+        <div class="w-[1px] h-8 bg-gradient-to-b from-transparent via-white/60 to-white/90"></div>
         <div class="scroll-indicator mt-1">
-          <svg class="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg class="w-4 h-4 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
@@ -146,10 +141,13 @@ const jsonLd = {
     </section>
 
     <!-- ==================== ÜRÜN KATALOĞU (React + Framer Motion) ==================== -->
-    <CatalogSection client:load />
+    <CatalogSection client:load mode="home" />
+
+    <!-- ==================== GOOGLE REVIEWS ==================== -->
+    <GoogleReviews client:load />
 
     <!-- ==================== HAKKIMIZDA BÖLÜMÜ - MODERN & ÇOCUK DOSTU ==================== -->
-    <section id="hakkimizda" class="py-16 md:py-24 bg-gradient-to-b from-pink-50/50 via-white to-blue-50/30 relative overflow-hidden">
+    <section id="hakkimizda" class="py-12 bg-gradient-to-b from-pink-50/50 via-white to-blue-50/30 relative overflow-hidden">
       <!-- Decorative Elements -->
       <div class="absolute top-10 left-10 w-20 h-20 bg-pink-200/20 rounded-full blur-2xl"></div>
       <div class="absolute bottom-10 right-10 w-32 h-32 bg-blue-200/20 rounded-full blur-3xl"></div>
@@ -243,6 +241,9 @@ const jsonLd = {
         </div>
       </div>
     </section>
+
+    <!-- ==================== GOOGLE REVIEWS ==================== -->
+    <GoogleReviews client:load />
 
     <!-- ==================== İLETİŞİM - KOMPAKT & MODERN ==================== -->
     <section id="iletisim" class="py-12 md:py-16 bg-gradient-to-b from-blue-50/30 via-white to-pink-50/30 relative overflow-hidden">
@@ -350,9 +351,9 @@ const jsonLd = {
 
   /* Hero Logo Glow Effect */
   .hero-logo-glow {
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4))
-            drop-shadow(0 0 40px rgba(255, 255, 255, 0.2))
-            drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.5))
+            drop-shadow(0 0 50px rgba(255, 255, 255, 0.3))
+            drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
   }
 
   /* Scroll Indicator Animation */

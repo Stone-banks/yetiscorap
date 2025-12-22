@@ -7,8 +7,9 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Footer from '@components/Footer.astro';
 import WhatsAppButton from '@components/WhatsAppButton.astro';
-import CatalogGrid from '@components/CatalogGrid.astro';
+import CatalogSection from '@components/CatalogSection.tsx';
 import HeaderNav from '@components/HeaderNav.tsx';
+import GoogleReviews from '@components/GoogleReviews.tsx';
 
 // JSON-LD structured data
 const jsonLd = {
@@ -49,7 +50,7 @@ const jsonLd = {
     <section class="hero-section relative min-h-[100vh] md:min-h-[90vh] flex items-center overflow-hidden">
       <div class="hero-bg absolute inset-0 z-0">
         <img
-          src="/dikeyhero.png"
+          src="/dikeyhero.jpg"
           alt=""
           class="hero-img-mobile md:hidden w-full h-full object-cover object-center"
           loading="eager"
@@ -57,7 +58,7 @@ const jsonLd = {
           aria-hidden="true"
         />
         <img
-          src="/yatayhero.png"
+          src="/yatayhero.jpg"
           alt=""
           class="hero-img-desktop hidden md:block w-full h-full object-cover object-center"
           loading="eager"
@@ -68,28 +69,29 @@ const jsonLd = {
       </div>
 
       <div class="container relative z-10">
-        <div class="max-w-2xl py-12 md:py-16 lg:py-20">
-          <div class="mb-6 md:mb-8">
+        <div class="max-w-2xl py-10 md:py-14 lg:py-18">
+          <div class="mb-4 md:mb-6">
             <img
               src="/yetiscoraplogo.png"
               alt="Yetiş Çorap Logo"
-              class="h-32 sm:h-40 md:h-48 lg:h-56 w-auto"
+              class="h-36 sm:h-44 md:h-52 lg:h-60 w-auto drop-shadow-xl"
+              style="filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));"
               width="400"
               height="156"
             />
           </div>
 
-          <h1 class="heading-display mb-4 md:mb-6">
+          <h1 class="heading-display mb-3 md:mb-4">
             Quality Baby & Children Socks
-            <span class="block text-pink-500 mt-1">Wholesale</span>
+            <span class="block text-pink-500 mt-0.5">Wholesale</span>
           </h1>
 
-          <p class="text-body-lg text-slate-600 mb-6 md:mb-8 max-w-xl">
+          <p class="text-body-lg text-slate-600 mb-4 md:mb-6 max-w-xl">
             Your reliable sock supplier in Istanbul Giyimkent with <strong class="text-slate-800">20+ years of experience</strong>.
             High quality, competitive prices, fast delivery.
           </p>
 
-          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-10 md:mb-12">
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 md:mb-10">
             <WhatsAppButton
               message="Hello, I would like to get information about wholesale sock prices."
               size="lg"
@@ -209,7 +211,7 @@ const jsonLd = {
     </section>
 
     <!-- ==================== PRODUCT CATALOG ==================== -->
-    <CatalogGrid lang="en" />
+    <CatalogSection client:load mode="home" />
 
     <!-- ==================== ABOUT US ==================== -->
     <section id="about" class="section-lg relative overflow-hidden">
@@ -306,6 +308,9 @@ const jsonLd = {
         </div>
       </div>
     </section>
+
+    <!-- ==================== GOOGLE REVIEWS ==================== -->
+    <GoogleReviews client:load />
 
     <!-- ==================== CONTACT ==================== -->
     <section id="contact" class="section-lg bg-gradient-to-b from-slate-50 to-white">
