@@ -955,27 +955,20 @@ export default function CatalogSection({ mode = 'home' }: CatalogSectionProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* 2026 Koleksiyonu Badge - Ana Sayfa */}
-          {mode === 'home' && (
-            <div className="flex justify-center mb-4">
-              <span className="inline-block px-4 py-2 bg-pink-500 text-white text-sm font-bold rounded-lg shadow-lg whitespace-nowrap transform -rotate-2 hover:rotate-0 transition-transform duration-300">
-                2026 Koleksiyonu
-              </span>
-            </div>
-          )}
-
           {/* Section Header */}
-          <div className="flex items-center justify-center gap-4 mb-4">
+          <div className={`flex items-center justify-center gap-3 mb-4 ${mode === 'home' ? '' : ''}`}>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800">
               {mode === 'home' ? 'Son Eklenenler' : 'Ürün Kataloğu'}
             </h2>
 
-              {/* 2026 Koleksiyonu Badge - Ürünler Sayfası */}
-              {mode === 'full' && (
-                <span className="inline-block px-4 py-2 bg-pink-50 border border-pink-200 text-pink-600 text-sm font-semibold rounded-lg">
-                  2026 Koleksiyonu
-                </span>
-              )}
+              {/* 2026 Koleksiyonu Badge - Her iki modda da */}
+              <span className={`inline-block px-4 py-2 text-sm font-semibold rounded-lg ${
+                mode === 'home'
+                  ? 'bg-pink-500 text-white shadow-lg whitespace-nowrap transform -rotate-2 hover:rotate-0 transition-transform duration-300'
+                  : 'bg-pink-50 border border-pink-200 text-pink-600'
+              }`}>
+                2026 Koleksiyonu
+              </span>
 
               {/* Layout Switcher - Only for full mode */}
               {mode === 'full' && (

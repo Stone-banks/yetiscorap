@@ -341,7 +341,7 @@ const MobileDrawer = ({
               {/* Footer */}
               <div className="px-5 py-4 border-t border-gray-100">
                 <p className="text-[10px] text-gray-400 text-center">
-                  © 2024 Yetiş Çorap
+                  © 2026 Yetiş Çorap
                 </p>
               </div>
             </div>
@@ -493,25 +493,45 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
       {/* ==================== DESKTOP HEADER ==================== */}
       <header
         className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/95 backdrop-blur-lg shadow-md py-2' 
-            : 'bg-transparent py-4'
+          isScrolled
+            ? 'bg-white/95 backdrop-blur-lg shadow-md py-2'
+            : 'bg-white py-4'
         }`}
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,182,193,0.05) 35px, rgba(255,182,193,0.05) 70px),
+                           repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,218,185,0.05) 35px, rgba(255,218,185,0.05) 70px),
+                           repeating-linear-gradient(90deg, transparent, transparent 35px, rgba(221,160,221,0.05) 35px, rgba(221,160,221,0.05) 70px)`
+        }}
       >
         <div className="container mx-auto px-6 max-w-7xl">
           <nav className="flex items-center justify-between">
             {/* Logo */}
-            <a 
-              href={lang === 'tr' ? '/' : '/en'} 
-              className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
+            <a
+              href={lang === 'tr' ? '/' : '/en'}
+              className="flex-shrink-0 transition-transform duration-200 hover:scale-105 flex items-center gap-2"
             >
-              <img
-                src="/yetiscoraplogo.png"
-                alt="Yetiş Çorap"
-                className={`w-auto object-contain transition-all duration-300 ${
-                  isScrolled ? 'h-10' : 'h-12'
-                }`}
-              />
+              <div className="relative">
+                {/* Pastel Aura */}
+                <div
+                  className={`absolute -inset-4 rounded-full opacity-60 blur-lg transition-all duration-300 ${
+                    isScrolled ? 'scale-75' : 'scale-100'
+                  }`}
+                  style={{
+                    background: 'radial-gradient(circle, rgba(253,242,248,0.5) 0%, rgba(240,253,244,0.3) 50%, transparent 70%)'
+                  }}
+                />
+                <img
+                  src="/yetiscoraplogo.png"
+                  alt="Yetiş Çorap"
+                  className={`relative w-auto object-contain transition-all duration-300 ${
+                    isScrolled ? 'h-10' : 'h-12'
+                  }`}
+                />
+              </div>
+              {/* Mini Slogan */}
+              <span className="hidden lg:inline-block text-xs text-gray-400 font-light tracking-wide">
+                Bebek & Çocuk Çorapları | Toptan
+              </span>
             </a>
 
             {/* Menu Items */}
@@ -625,19 +645,31 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
       {/* ==================== MOBILE TOP HEADER ==================== */}
       <header
         className={`md:hidden fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/95 backdrop-blur-lg shadow-md' 
+          isScrolled
+            ? 'bg-white/95 backdrop-blur-lg shadow-md'
             : 'bg-white/90 backdrop-blur-sm'
         }`}
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,182,193,0.05) 20px, rgba(255,182,193,0.05) 40px),
+                           repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,218,185,0.05) 20px, rgba(255,218,185,0.05) 40px)`
+        }}
       >
         <nav className="flex items-center justify-between px-4 h-14">
           {/* Logo */}
           <a href={lang === 'tr' ? '/' : '/en'} className="flex-shrink-0">
-            <img
-              src="/yetiscoraplogo.png"
-              alt="Yetiş Çorap"
-              className="h-9 w-auto object-contain"
-            />
+            <div className="relative">
+              <div
+                className="absolute -inset-3 rounded-full opacity-50 blur-md"
+                style={{
+                  background: 'radial-gradient(circle, rgba(253,242,248,0.5) 0%, rgba(240,253,244,0.3) 50%, transparent 70%)'
+                }}
+              />
+              <img
+                src="/yetiscoraplogo.png"
+                alt="Yetiş Çorap"
+                className="relative h-9 w-auto object-contain"
+              />
+            </div>
           </a>
 
           {/* Sağ taraf: İletişim + Dil Seçimi + Hamburger */}

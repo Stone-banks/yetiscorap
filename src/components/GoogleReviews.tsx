@@ -122,13 +122,13 @@ const GoogleReviews = () => {
 
         {/* Reviews Slider */}
         <div className="relative">
-          {/* Navigasyon Okları - Masaüstünde Görünür */}
+          {/* Navigasyon Okları - Her zaman görünür */}
           <button
             onClick={() => {
               handlePrev();
               scrollToCard(currentIndex - 1 < 0 ? reviews.length - 1 : currentIndex - 1);
             }}
-            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110"
           >
             <HiChevronLeft className="w-6 h-6 text-slate-700" />
           </button>
@@ -137,14 +137,14 @@ const GoogleReviews = () => {
               handleNext();
               scrollToCard(currentIndex + 1 >= reviews.length ? 0 : currentIndex + 1);
             }}
-            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg items-center justify-center z-10 transition-all duration-200 hover:scale-110"
           >
             <HiChevronRight className="w-6 h-6 text-slate-700" />
           </button>
 
           <div
             id="reviews-container"
-            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-hide cursor-grab active:cursor-grabbing scroll-smooth"
+            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 scrollbar-hide cursor-grab active:cursor-grabbing scroll-smooth touch-pan-y"
             onMouseDown={() => setIsDragging(true)}
             onMouseUp={() => setIsDragging(false)}
             onMouseLeave={() => setIsDragging(false)}
@@ -157,8 +157,7 @@ const GoogleReviews = () => {
             }}
             style={{
               scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitScrollbar: 'hidden'
+              msOverflowStyle: 'none'
             }}
           >
             {reviews.map((review, index) => (
@@ -246,7 +245,7 @@ const GoogleReviews = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
