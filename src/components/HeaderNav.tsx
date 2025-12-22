@@ -524,7 +524,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
                   src="/yetiscoraplogo.png"
                   alt="Yetiş Çorap"
                   className="relative object-contain transition-all duration-300"
-                  style={{ width: '140px', height: 'auto' }}
+                  style={{ width: '72px', height: 'auto', imageRendering: 'auto' }}
                 />
               </div>
               {/* Mini Slogan */}
@@ -667,7 +667,7 @@ export default function HeaderNav({ lang = 'tr', currentPath = '' }: HeaderNavPr
                 src="/yetiscoraplogo.png"
                 alt="Yetiş Çorap"
                 className="relative object-contain"
-                style={{ width: '110px', height: 'auto' }}
+                style={{ width: '72px', height: 'auto', imageRendering: 'auto' }}
               />
             </div>
           </a>
