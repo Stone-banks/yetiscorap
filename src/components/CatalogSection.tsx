@@ -92,9 +92,10 @@ interface ProductCardProps {
   onToggleFavorite: (product: Product) => void;
   onQuickView: (product: Product) => void;
   lang: 'tr' | 'en';
+  mode?: 'home' | 'full';
 }
 
-const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, onQuickView, lang }: ProductCardProps) => {
+const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, onQuickView, lang, mode }: ProductCardProps & { mode?: 'home' | 'full' }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -248,13 +249,15 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
             </div>
           )}
 
-          <h3 className={`font-semibold text-slate-800 leading-tight mb-0.5 sm:mb-1 line-clamp-${
-            viewMode === 'list' ? '1' : '1 sm:2'
-          } ${
-            viewMode === 'list' ? 'text-base' : 'text-xs sm:text-sm'
-          }`}>
-            {product.name}
-          </h3>
+          {mode !== 'home' && (
+            <h3 className={`font-semibold text-slate-800 leading-tight mb-0.5 sm:mb-1 line-clamp-${
+              viewMode === 'list' ? '1' : '1 sm:2'
+            } ${
+              viewMode === 'list' ? 'text-base' : 'text-xs sm:text-sm'
+            }`}>
+              {product.name}
+            </h3>
+          )}
 
           {viewMode !== 'list' && (
             <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">{product.ageRange}</p>
@@ -297,37 +300,14 @@ interface QuickViewModalProps {
   lang: 'tr' | 'en';
 }
 
-// Yeni bir redirect ürün tipi tanımlayalım
-interface RedirectProduct extends Product {
-  type: 'redirect';
-}
-
 const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, onToggleFavorite, mode = 'full', lang }: QuickViewModalProps) => {
   const [direction, setDirection] = useState(0);
   const [imageKey, setImageKey] = useState(0);
 
   if (!product) return null;
 
-  // Ana sayfa modunda 5. üründen sonra redirect objesi ekle
-  const extendedProducts = useMemo(() => {
-    if (mode === 'home' && products.length >= 5) {
-      const t = translations[lang];
-      const redirectProduct: RedirectProduct = {
-        id: -1,
-        code: 'REDIRECT',
-        name: t.redirectName,
-        category: 'bebek',
-        ageRange: '',
-        image: '',
-        type: 'redirect'
-      };
-      return [...products.slice(0, 5), redirectProduct];
-    }
-    return products;
-  }, [products, mode, lang]);
-
   // Mevcut ürünün index'ini bul
-  const currentIndex = extendedProducts.findIndex(p => p.id === product.id);
+  const currentIndex = products.findIndex(p => p.id === product.id);
 
   // Önceki ürüne git (infinite loop for full mode, limited for home)
   const handlePrev = (e?: React.MouseEvent) => {
@@ -340,14 +320,14 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
       prevIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
     } else {
       // Full mode: infinite loop
-      prevIndex = currentIndex <= 0 ? extendedProducts.length - 1 : currentIndex - 1;
+      prevIndex = currentIndex <= 0 ? products.length - 1 : currentIndex - 1;
     }
 
     setImageKey(prev => prev + 1);
-    onNavigate(extendedProducts[prevIndex]);
+    onNavigate(products[prevIndex]);
   };
 
-  // Sonraki ��rüne git (limited for home mode)
+  // Sonraki ürüne git (limited for home mode)
   const handleNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setDirection(1);
@@ -355,14 +335,14 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
 
     if (mode === 'home') {
       // Home mode: don't loop
-      nextIndex = Math.min(currentIndex + 1, extendedProducts.length - 1);
+      nextIndex = Math.min(currentIndex + 1, products.length - 1);
     } else {
       // Full mode: infinite loop
-      nextIndex = currentIndex >= extendedProducts.length - 1 ? 0 : currentIndex + 1;
+      nextIndex = currentIndex >= products.length - 1 ? 0 : currentIndex + 1;
     }
 
     setImageKey(prev => prev + 1);
-    onNavigate(extendedProducts[nextIndex]);
+    onNavigate(products[nextIndex]);
   };
 
   // Swipe handler
@@ -371,10 +351,7 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
     if (info.offset.x > swipeThreshold) {
       handlePrev();
     } else if (info.offset.x < -swipeThreshold) {
-      // Don't allow swipe on redirect product
-      if (!(extendedProducts[currentIndex] as RedirectProduct).type) {
-        handleNext();
-      }
+      handleNext();
     }
   };
 
@@ -382,12 +359,12 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === 'ArrowRight' && !(extendedProducts[currentIndex] as RedirectProduct).type) handleNext();
+      if (e.key === 'ArrowRight') handleNext();
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, extendedProducts]);
+  }, [currentIndex, products]);
 
   // Image animation variants
   const imageVariants = {
@@ -453,214 +430,140 @@ const QuickViewModal = ({ product, products, onClose, onNavigate, isFavorite, on
 
         {/* Product Image with Navigation */}
         <div className="relative aspect-square bg-slate-100 overflow-hidden">
-          {/* Check if this is a redirect product */}
-          {(product as RedirectProduct).type === 'redirect' ? (
-            /* Professional Catalog Cover */
-            <motion.div
-              className="absolute inset-0 z-30 overflow-hidden"
-              style={{
-                backgroundImage: 'url(/katalog.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent backdrop-blur-sm" />
-              
-              <motion.div
-                className="relative h-full flex flex-col justify-between p-6 sm:p-8 text-white"
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-              >
-                {/* Top Section with Badge and Close Button */}
-                <div className="flex justify-between items-start">
-                  {/* Shiny Pink Badge */}
-                  <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-pink-500 to-pink-600 rounded-full shadow-lg backdrop-blur-sm">
-                    <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-lg">{translations[lang].redirectBadge}</span>
-                  </div>
-                  
-                  {/* Close Button - X */}
-                  <button
-                    onClick={onClose}
-                    className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-                  >
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+          {/* Swipeable Image */}
+          <motion.div
+            className="w-full h-full"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+          >
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.img
+                key={imageKey}
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                custom={direction}
+                variants={imageVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                }}
+                draggable={false}
+              />
+            </AnimatePresence>
+          </motion.div>
 
-                {/* Middle Section - Main Content */}
-                <div className="text-center flex-1 flex flex-col justify-center items-center px-2 sm:px-4">
-                  <h2 className="text-4xl sm:text-6xl md:text-7xl font-black text-white mb-4 sm:mb-6 md:mb-8 leading-none drop-shadow-2xl whitespace-pre-line">
-                    {translations[lang].redirectTitle}
-                  </h2>
-                  
-                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-6 sm:mb-8 md:mb-12 max-w-sm sm:max-w-md leading-relaxed drop-shadow-lg">
-                    {translations[lang].redirectDesc}
-                  </p>
-                </div>
-
-                {/* Bottom Section - CTA Button */}
-                <div className="flex justify-center pb-4">
-                  <a
-                    href={translations[lang].redirectLink}
-                    onClick={onClose}
-                    className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 bg-white text-gray-900 text-base sm:text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-105 sm:hover:scale-110 hover:bg-pink-500 hover:text-white hover:shadow-2xl hover:shadow-pink-500/50"
-                  >
-                    <span className="text-sm sm:text-base">{translations[lang].redirectButton}</span>
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </a>
-                </div>
-              </motion.div>
-            </motion.div>
-          ) : (
-            /* Normal Product */
+          {/* Navigation Arrows - Görselin ortasında */}
+          {products.length > 1 && (
             <>
-              {/* Swipeable Image */}
-              <motion.div
-                className="w-full h-full"
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={handleDragEnd}
+              {/* Prev Button */}
+              <motion.button
+                onClick={handlePrev}
+                className={`absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all ${
+                  mode === 'home' && currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                disabled={mode === 'home' && currentIndex === 0}
               >
-                <AnimatePresence mode="wait" custom={direction}>
-                  <motion.img
-                    key={imageKey}
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    custom={direction}
-                    variants={imageVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.25, ease: 'easeInOut' }}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/placeholder.png';
-                    }}
-                    draggable={false}
-                  />
-                </AnimatePresence>
-              </motion.div>
+                <HiChevronLeft className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
+              </motion.button>
 
-              {/* Navigation Arrows - Görselin ortasında */}
-              {extendedProducts.length > 1 && (
-                <>
-                  {/* Prev Button */}
-                  <motion.button
-                    onClick={handlePrev}
-                    className={`absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all ${
-                      mode === 'home' && currentIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    disabled={mode === 'home' && currentIndex === 0}
-                  >
-                    <HiChevronLeft className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
-                  </motion.button>
-
-                  {/* Next Button */}
-                  <motion.button
-                    onClick={handleNext}
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all ${
-                      mode === 'home' && currentIndex >= extendedProducts.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    disabled={mode === 'home' && currentIndex >= extendedProducts.length - 1}
-                  >
-                    <HiChevronRight className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
-                  </motion.button>
-                </>
-              )}
-
-              {/* Product Code Badge */}
-              <div className="absolute bottom-4 left-4 z-10">
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-pink-500 text-white shadow-md">
-                  {product.code}
-                </span>
-              </div>
-
-              {/* Page Indicator */}
-              {extendedProducts.length > 1 && (
-                <div className="absolute bottom-4 right-4 z-10">
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/50 text-white backdrop-blur-sm">
-                    {currentIndex + 1} / {mode === 'home' ? extendedProducts.length : extendedProducts.length}
-                  </span>
-                </div>
-              )}
+              {/* Next Button */}
+              <motion.button
+                onClick={handleNext}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg z-20 transition-all ${
+                  mode === 'home' && currentIndex >= products.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                disabled={mode === 'home' && currentIndex >= products.length - 1}
+              >
+                <HiChevronRight className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
+              </motion.button>
             </>
+          )}
+
+          {/* Product Code Badge */}
+          <div className="absolute bottom-4 left-4 z-10">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-pink-500 text-white shadow-md">
+              {product.code}
+            </span>
+          </div>
+
+          {/* Page Indicator */}
+          {products.length > 1 && (
+            <div className="absolute bottom-4 right-4 z-10">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/50 text-white backdrop-blur-sm">
+                {currentIndex + 1} / {products.length}
+              </span>
+            </div>
           )}
         </div>
 
-        {/* Product Details - Only for non-redirect products */}
-        {(product as RedirectProduct).type !== 'redirect' && (
-          <motion.div
-            className="p-6"
-            key={product.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
+        {/* Product Details */}
+        <motion.div
+          className="p-6"
+          key={product.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <h2 className="text-xl font-bold text-slate-800 mb-2">{product.name}</h2>
+          <p className="text-sm text-slate-500 mb-4">{product.ageRange}</p>
+
+          {product.description && (
+            <p className="text-slate-600 text-sm mb-4">{product.description}</p>
+          )}
+
+          {/* Colors */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-slate-700 mb-2">{translations[lang].colors}</h4>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color) => (
+                  <span key={color} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
+                    {color}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sizes */}
+          {product.sizes && product.sizes.length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-slate-700 mb-2">{translations[lang].sizes}</h4>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => (
+                  <span key={size} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
+                    {size}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* WhatsApp Button */}
+          <motion.a
+            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(translations[lang].whatsappModalFull.replace('{code}', product.code).replace('{name}', product.name))}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-4 bg-green-500 text-white font-semibold rounded-xl flex items-center justify-center gap-3"
+            whileHover={{ backgroundColor: '#16a34a' }}
+            whileTap={{ scale: 0.98 }}
           >
-            <h2 className="text-xl font-bold text-slate-800 mb-2">{product.name}</h2>
-            <p className="text-sm text-slate-500 mb-4">{product.ageRange}</p>
-
-            {product.description && (
-              <p className="text-slate-600 text-sm mb-4">{product.description}</p>
-            )}
-
-            {/* Colors */}
-            {product.colors && product.colors.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-slate-700 mb-2">{translations[lang].colors}</h4>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <span key={color} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
-                      {color}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sizes */}
-            {product.sizes && product.sizes.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-slate-700 mb-2">{translations[lang].sizes}</h4>
-                <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
-                    <span key={size} className="px-3 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
-                      {size}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* WhatsApp Button */}
-            <motion.a
-              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(translations[lang].whatsappModalFull.replace('{code}', product.code).replace('{name}', product.name))}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-4 bg-green-500 text-white font-semibold rounded-xl flex items-center justify-center gap-3"
-              whileHover={{ backgroundColor: '#16a34a' }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              {translations[lang].whatsappModal}
-            </motion.a>
-          </motion.div>
-        )}
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            {translations[lang].whatsappModal}
+          </motion.a>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -791,10 +694,10 @@ const translations: Record<'tr' | 'en', {
 }> = {
   tr: {
     // Section titles
-    sectionTitleHome: 'Son Eklenenler',
+    sectionTitleHome: 'Ürünler',
     sectionTitleFull: 'Ürün Kataloğu',
     collectionBadge: '2026 Koleksiyonu',
-    sectionDescHome: 'En yeni ürünlerimizden bazıları',
+    sectionDescHome: '',
     sectionDescFull: 'Bebek ve çocuk çoraplarımızı inceleyin',
     
     // Filters
@@ -831,7 +734,7 @@ const translations: Record<'tr' | 'en', {
     addedToFavorites: 'favorilere eklendi!',
     removedFromFavorites: 'favorilerden çıkarıldı',
     
-    // Redirect card (home mode)
+    // Redirect card (home mode) - no longer used but kept for compatibility
     redirectBadge: 'Sınırları Keşfedin',
     redirectTitle: 'Tam\nKatalog',
     redirectDesc: 'Bebek ve çocuk modasında en trend 100\'den fazla model sizi bekliyor.',
@@ -853,10 +756,10 @@ const translations: Record<'tr' | 'en', {
   },
   en: {
     // Section titles
-    sectionTitleHome: 'Latest Arrivals',
+    sectionTitleHome: 'Products',
     sectionTitleFull: 'Product Catalog',
     collectionBadge: '2026 Collection',
-    sectionDescHome: 'Some of our newest products',
+    sectionDescHome: '',
     sectionDescFull: 'Explore our baby and children socks',
     
     // Filters
@@ -893,7 +796,7 @@ const translations: Record<'tr' | 'en', {
     addedToFavorites: 'added to favorites!',
     removedFromFavorites: 'removed from favorites',
     
-    // Redirect card (home mode)
+    // Redirect card (home mode) - no longer used but kept for compatibility
     redirectBadge: 'Discover More',
     redirectTitle: 'Full\nCatalog',
     redirectDesc: '100+ trendy models in baby and kids fashion waiting for you.',
@@ -938,7 +841,7 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const productsPerPage = mode === 'home' ? 5 : 10;
+  const productsPerPage = mode === 'home' ? 4 : 10;
 
   // Get URL params on mount
   useEffect(() => {
@@ -1116,34 +1019,17 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
     }
   }, [currentPage, mode]);
 
-  // Sayfalama için hesaplanan ürünler
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * productsPerPage;
-    const endIndex = startIndex + productsPerPage;
-    return filteredProducts.slice(startIndex, endIndex);
-  }, [filteredProducts, currentPage]);
-
-  // Toplam sayfa sayısı
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
-  // "Daha Fazla Gör" mantığı için genişletme durumu (sadece ana sayfa için)
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // Ana sayfada gösterilecek ürünler (ilk 4 veya 5)
+  // Ana sayfada gösterilecek ürünler (ilk 4)
   const displayedProducts = useMemo(() => {
     if (mode === 'home') {
       // İlk 4 ürün her zaman gösterilir (2x2 grid)
-      if (!isExpanded) {
-        return filteredProducts.slice(0, 4);
-      }
-      // Genişletilmişse ilk 5 ürünü göster
-      return filteredProducts.slice(0, 5);
+      return filteredProducts.slice(0, 4);
     }
     // Full modda sayfalama kullanılır
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = startIndex + productsPerPage;
     return filteredProducts.slice(startIndex, endIndex);
-  }, [filteredProducts, isExpanded, mode, currentPage, productsPerPage]);
+  }, [filteredProducts, mode, currentPage, productsPerPage]);
 
   // Favori toggle
   const toggleFavorite = (product: Product) => {
@@ -1224,12 +1110,12 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
             {mode === 'home' ? t.sectionTitleHome : t.sectionTitleFull}
           </h2>
 
-          {/* 2026 Koleksiyonu Badge - Sticker Style */}
-          <span className={`inline-block px-3 py-1 text-xs md:text-sm font-semibold rounded-full shadow-lg whitespace-nowrap transform -rotate-3 hover:rotate-0 transition-transform duration-300 ${
-            mode === 'full' ? 'bg-pink-500 text-white' : 'bg-pink-500 text-white'
-          }`} style={mode === 'full' ? { textShadow: '0 1px 4px rgba(0,0,0,0.3)' } : {}}>
-            {t.collectionBadge}
-          </span>
+          {/* 2026 Koleksiyonu Badge - Only for full mode */}
+          {mode === 'full' && (
+            <span className="inline-block px-3 py-1 text-xs md:text-sm font-semibold rounded-full shadow-lg whitespace-nowrap transform -rotate-3 hover:rotate-0 transition-transform duration-300 bg-pink-500 text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
+              {t.collectionBadge}
+            </span>
+          )}
 
           {/* Layout Switcher - Only for full mode */}
           {mode === 'full' && (
@@ -1259,79 +1145,73 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
             </div>
           )}
         </div>
-        <p className={`text-lg max-w-2xl mx-auto ${
-          mode === 'full' ? 'text-white/90' : 'text-slate-600'
-        }`} style={mode === 'full' ? { textShadow: '0 1px 4px rgba(0,0,0,0.5)' } : {}}>
-          {mode === 'home' ? t.sectionDescHome : t.sectionDescFull}
-        </p>
+        {mode === 'full' && (
+          <p className="text-lg max-w-2xl mx-auto text-white/90" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+            {t.sectionDescFull}
+          </p>
+        )}
       </motion.div>
 
-      {/* Filter Bar */}
-      <div className={`${mode === 'home' ? 'max-w-lg' : 'max-w-xl'} mx-auto mb-8`}>
-        {/* Arama Kutusu */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <div className="relative">
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.searchPlaceholder}
-              className={`w-full pl-12 pr-4 py-4 backdrop-blur-sm border rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-lg transition-all placeholder:text-slate-400 ${
-                mode === 'full'
-                  ? 'bg-white/10 border-white/30 text-white placeholder:text-white/60'
-                  : 'bg-white/90 border-slate-200 text-slate-800'
-              }`}
-            />
-            {/* Arama göstergesi */}
-            {searchQuery && searchQuery !== debouncedSearchQuery && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-            )}
-          </div>
-        </motion.div>
+      {/* Filter Bar - Only for full mode */}
+      {mode === 'full' && (
+        <div className="max-w-xl mx-auto mb-8">
+          {/* Arama Kutusu */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7.7 0 11-14 0 7.5 0 0114 0z" />
+              </svg>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.searchPlaceholder}
+                className="w-full pl-12 pr-4 py-4 backdrop-blur-sm border rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-lg transition-all placeholder:text-slate-400 bg-white/10 border-white/30 text-white placeholder:text-white/60"
+              />
+              {/* Arama göstergesi */}
+              {searchQuery && searchQuery !== debouncedSearchQuery && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              )}
+            </div>
+          </motion.div>
 
-        {/* Filtre Butonları */}
-        <motion.div
-          className="mt-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <div className={`flex justify-center gap-1.5 md:gap-3 overflow-x-auto overflow-y-hidden pb-2 flex-nowrap scroll-smooth scrollbar-hide ${
-            mode === 'full' ? 'px-4 -mx-4' : 'px-4 -mx-4'
-          } w-full`}>
-            {categories.map((cat) => (
-              <motion.button
-                key={cat.id}
-                onClick={() => toggleCategory(cat.id)}
-                className={`flex-shrink-0 px-2 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 whitespace-nowrap backdrop-blur-sm ${
-                  isCategoryActive(cat.id)
-                    ? 'bg-pink-500/95 text-white shadow-lg'
-                    : mode === 'full'
-                    ? 'bg-white/10 text-white/80 border border-white/30 hover:border-pink-300 hover:text-white shadow-md hover:shadow-lg'
-                    : 'bg-white/90 text-slate-600 border border-slate-200 hover:border-pink-300 hover:text-pink-500 shadow-md hover:shadow-lg'
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {cat.label}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+          {/* Filtre Butonları */}
+          <motion.div
+            className="mt-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="flex justify-center gap-1.5 md:gap-3 overflow-x-auto overflow-y-hidden pb-2 flex-nowrap scroll-smooth scrollbar-hide px-4 -mx-4 w-full">
+              {categories.map((cat) => (
+                <motion.button
+                  key={cat.id}
+                  onClick={() => toggleCategory(cat.id)}
+                  className={`flex-shrink-0 px-2 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 whitespace-nowrap backdrop-blur-sm ${
+                    isCategoryActive(cat.id)
+                      ? 'bg-pink-500/95 text-white shadow-lg'
+                      : 'bg-white/10 text-white/80 border border-white/30 hover:border-pink-300 hover:text-white shadow-md hover:shadow-lg'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {cat.label}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Sonuç Sayısı - Only for full mode */}
       {mode === 'full' && (
@@ -1409,33 +1289,12 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
               onToggleFavorite={toggleFavorite}
               onQuickView={setSelectedProduct}
               lang={lang}
+              mode={mode}
             />
           ))}
         </motion.div>
       )}
 
-      {/* "Daha Fazla Gör" Butonu - Sadece ana sayfa için */}
-      {mode === 'home' && !isLoading && filteredProducts.length > 4 && (
-        <motion.div
-          className="text-center mt-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <motion.a
-            href={t.redirectLink}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-white text-pink-500 text-lg font-semibold rounded-full border-2 border-pink-500 shadow-md hover:bg-pink-50 transition-colors"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <span>{t.goToCatalog}</span>
-            <span className="text-sm text-pink-400">({filteredProducts.length}{t.productsCount})</span>
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </motion.a>
-        </motion.div>
-      )}
 
       {/* Sayfalama (Pagination) - Only for full mode */}
       {mode === 'full' && !isLoading && filteredProducts.length > productsPerPage && (
@@ -1515,6 +1374,9 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
     </>
   );
   
+  // Toplam sayfa sayısı
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
   return (
     <>
       <Toaster position="top-center" />
@@ -1526,7 +1388,7 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
         {selectedProduct && (
           <QuickViewModal
             product={selectedProduct}
-            products={mode === 'home' ? filteredProducts.slice(0, 5) : filteredProducts}
+            products={mode === 'home' ? filteredProducts.slice(0, 4) : filteredProducts}
             onClose={() => setSelectedProduct(null)}
             onNavigate={setSelectedProduct}
             isFavorite={isFavorite(selectedProduct.id)}
