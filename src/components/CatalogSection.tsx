@@ -249,15 +249,7 @@ const ProductCard = ({ product, index, isFavorite, viewMode, onToggleFavorite, o
             </div>
           )}
 
-          {mode !== 'home' && (
-            <h3 className={`font-semibold text-slate-800 leading-tight mb-0.5 sm:mb-1 line-clamp-${
-              viewMode === 'list' ? '1' : '1 sm:2'
-            } ${
-              viewMode === 'list' ? 'text-base' : 'text-xs sm:text-sm'
-            }`}>
-              {product.name}
-            </h3>
-          )}
+          {/* Ürün ismi gizlendi - sadece görsel, kod ve yaş bilgisi gösteriliyor */}
 
           {viewMode !== 'list' && (
             <p className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-3">{product.ageRange}</p>
@@ -841,7 +833,7 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const productsPerPage = mode === 'home' ? 4 : 10;
+  const productsPerPage = 4; // Both modes show 4 products
 
   // Get URL params on mount
   useEffect(() => {
@@ -1019,17 +1011,10 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
     }
   }, [currentPage, mode]);
 
-  // Ana sayfada gösterilecek ürünler (ilk 4)
+  // Her iki modda da sadece ilk 4 ürün gösterilir
   const displayedProducts = useMemo(() => {
-    if (mode === 'home') {
-      // İlk 4 ürün her zaman gösterilir (2x2 grid)
-      return filteredProducts.slice(0, 4);
-    }
-    // Full modda sayfalama kullanılır
-    const startIndex = (currentPage - 1) * productsPerPage;
-    const endIndex = startIndex + productsPerPage;
-    return filteredProducts.slice(startIndex, endIndex);
-  }, [filteredProducts, mode, currentPage, productsPerPage]);
+    return filteredProducts.slice(0, 4);
+  }, [filteredProducts]);
 
   // Favori toggle
   const toggleFavorite = (product: Product) => {
@@ -1047,40 +1032,13 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
     return favorites.some(fav => fav.id === productId);
   };
 
-  // Full mode için katalog arka planı ile component
-  const FullModeWithBackground = () => (
-    <div className="relative min-h-screen">
-      {/* Fixed Background Image - Özel Katalog Arka Planı */}
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          backgroundImage: 'url(/katalogbackground.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      />
-      
-      {/* Siyah Overlay - Kristal Netliğinde Okunabilirlik */}
-      <div className="fixed inset-0 z-10 bg-black/60"></div>
-      
-      {/* Üst Geçiş - Beyazdan Şeffafa (Navbar'dan Katalog'a) */}
-      <div className="fixed top-0 left-0 right-0 z-15 h-32 pointer-events-none" style={{
-        background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%)'
-      }} />
-      
-      {/* Alt Geçiş - Koyudan Şeffafa (Katalog'dan Footer'a) */}
-      <div className="fixed bottom-0 left-0 right-0 z-15 h-40 pointer-events-none" style={{
-        background: 'linear-gradient(to top, rgba(30,41,59,0.5) 0%, rgba(30,41,59,0) 100%)'
-      }} />
-      
-      {/* Content Section */}
-      <section id="urunler" className="relative z-20 py-10 md:py-14">
-        <div className="container mx-auto px-4 sm:px-6">
-          <CatalogContent />
-        </div>
-      </section>
-    </div>
+  // Full mode için basit section (artık arka plan yok)
+  const FullModeSimple = () => (
+    <section id="urunler" className="py-10 md:py-14 pb-16 md:pb-20">
+      <div className="container mx-auto px-4 sm:px-6">
+        <CatalogContent />
+      </div>
+    </section>
   );
 
   // Home mode için basit section
@@ -1095,156 +1053,29 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
   // Ortak içerik component
   const CatalogContent = () => (
     <>
-      {/* Section Header with Layout Switcher */}
-      <motion.div
-        className="text-center mb-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Section Header */}
-        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-4">
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold ${
-            mode === 'full' ? 'text-white' : 'text-slate-800'
-          }`} style={mode === 'full' ? { textShadow: '0 2px 8px rgba(0,0,0,0.5)' } : {}}>
-            {mode === 'home' ? t.sectionTitleHome : t.sectionTitleFull}
-          </h2>
-
-          {/* 2026 Koleksiyonu Badge - Only for full mode */}
-          {mode === 'full' && (
-            <span className="inline-block px-3 py-1 text-xs md:text-sm font-semibold rounded-full shadow-lg whitespace-nowrap transform -rotate-3 hover:rotate-0 transition-transform duration-300 bg-pink-500 text-white" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
-              {t.collectionBadge}
-            </span>
-          )}
-
-          {/* Layout Switcher - Only for full mode */}
-          {mode === 'full' && (
-            <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-lg border border-slate-200 p-1 shadow-md">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-pink-500 text-white'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}
-                title={t.gridView}
-              >
-                <HiOutlineViewGrid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-pink-500 text-white'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}
-                title={t.listView}
-              >
-                <HiBars3 className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-        </div>
-        {mode === 'full' && (
-          <p className="text-lg max-w-2xl mx-auto text-white/90" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
-            {t.sectionDescFull}
-          </p>
-        )}
-      </motion.div>
-
-      {/* Filter Bar - Only for full mode */}
-      {mode === 'full' && (
-        <div className="max-w-xl mx-auto mb-8">
-          {/* Arama Kutusu */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7.7 0 11-14 0 7.5 0 0114 0z" />
-              </svg>
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.searchPlaceholder}
-                className="w-full pl-12 pr-4 py-4 backdrop-blur-sm border rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-lg transition-all placeholder:text-slate-400 bg-white/10 border-white/30 text-white placeholder:text-white/60"
-              />
-              {/* Arama göstergesi */}
-              {searchQuery && searchQuery !== debouncedSearchQuery && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                  <svg className="animate-spin h-5 w-5 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Filtre Butonları */}
-          <motion.div
-            className="mt-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <div className="flex justify-center gap-1.5 md:gap-3 overflow-x-auto overflow-y-hidden pb-2 flex-nowrap scroll-smooth scrollbar-hide px-4 -mx-4 w-full">
-              {categories.map((cat) => (
-                <motion.button
-                  key={cat.id}
-                  onClick={() => toggleCategory(cat.id)}
-                  className={`flex-shrink-0 px-2 md:px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all duration-300 whitespace-nowrap backdrop-blur-sm ${
-                    isCategoryActive(cat.id)
-                      ? 'bg-pink-500/95 text-white shadow-lg'
-                      : 'bg-white/10 text-white/80 border border-white/30 hover:border-pink-300 hover:text-white shadow-md hover:shadow-lg'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {cat.label}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Sonuç Sayısı - Only for full mode */}
-      {mode === 'full' && (
+      {/* Section Header - Sadece home mode'da */}
+      {mode === 'home' && (
         <motion.div
-          className="text-center mb-6 relative z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <p className={`text-sm font-medium ${
-            mode === 'full' ? 'text-white/90' : 'text-slate-700'
-          }`} style={mode === 'full' ? { textShadow: '0 1px 4px rgba(0,0,0,0.5)' } : {}}>
-            <AnimatedCounter value={filteredProducts.length} /> {t.productsFound}
-          </p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800">
+            {t.sectionTitleHome}
+          </h2>
         </motion.div>
       )}
 
-      {/* Ürün Grid/List - Dinamik Görünüm */}
+      {/* Ürün Grid */}
       {isLoading ? (
         <motion.div
-          className={`${
-            mode === 'home'
-              ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
-              : viewMode === 'grid'
-              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
-              : 'space-y-3 max-w-4xl mx-auto'
-          }`}
-          style={mode === 'full' ? { textShadow: '0 1px 3px rgba(0,0,0,0.3)' } : {}}
+          className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          {[...Array(mode === 'home' ? 4 : 6)].map((_, i) => (
+          {[...Array(4)].map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </motion.div>
@@ -1256,25 +1087,10 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
           <p className="text-slate-500">
             {t.noResultsDesc}
           </p>
-          <button
-            onClick={() => {
-              setActiveCategories([]);
-              setSearchQuery('');
-            }}
-            className="mt-4 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
-          >
-            {t.clearFilters}
-          </button>
         </div>
       ) : (
         <motion.div
-          className={`${
-            mode === 'home'
-              ? 'grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto'
-              : viewMode === 'grid'
-              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4'
-              : 'space-y-3 max-w-4xl mx-auto'
-          }`}
+          className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -1285,7 +1101,7 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
               product={product}
               index={index}
               isFavorite={isFavorite(product.id)}
-              viewMode={mode === 'home' ? 'grid' : viewMode}
+              viewMode="grid"
               onToggleFavorite={toggleFavorite}
               onQuickView={setSelectedProduct}
               lang={lang}
@@ -1294,106 +1110,26 @@ export default function CatalogSection({ mode = 'home', lang = 'tr' }: CatalogSe
           ))}
         </motion.div>
       )}
-
-
-      {/* Sayfalama (Pagination) - Only for full mode */}
-      {mode === 'full' && !isLoading && filteredProducts.length > productsPerPage && (
-        <motion.div
-          className="flex flex-col items-center gap-4 mt-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          {/* Sayfa Navigasyonu */}
-          <div className="flex items-center gap-2">
-            {/* Önceki Sayfa */}
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                currentPage === 1
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-              }`}
-            >
-              {t.previous}
-            </button>
-
-            {/* Sayfa Numaraları */}
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                      pageNum === currentPage
-                        ? 'bg-pink-500 text-white'
-                        : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Sonraki Sayfa */}
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                currentPage === totalPages
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-              }`}
-            >
-              {t.next}
-            </button>
-          </div>
-
-          {/* Sayfa Bilgisi */}
-          <p className={`text-sm ${
-            mode === 'full' ? 'text-white/70' : 'text-slate-500'
-          }`}>
-            {currentPage}{t.pageInfo} {filteredProducts.length} {t.productsWord}
-          </p>
-        </motion.div>
-      )}
     </>
   );
   
-  // Toplam sayfa sayısı
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
   return (
     <>
       <Toaster position="top-center" />
       
-      {mode === 'full' ? <FullModeWithBackground /> : <HomeModeSimple />}
+      {mode === 'full' ? <FullModeSimple /> : <HomeModeSimple />}
 
       {/* Quick View Modal */}
       <AnimatePresence>
         {selectedProduct && (
           <QuickViewModal
             product={selectedProduct}
-            products={mode === 'home' ? filteredProducts.slice(0, 4) : filteredProducts}
+            products={filteredProducts.slice(0, 4)}
             onClose={() => setSelectedProduct(null)}
             onNavigate={setSelectedProduct}
             isFavorite={isFavorite(selectedProduct.id)}
             onToggleFavorite={toggleFavorite}
-            mode={mode}
+            mode="home"
             lang={lang}
           />
         )}
