@@ -60,9 +60,6 @@
               "format": "unix-time"
             }
           ]
-        },
-        "$schema": {
-          "type": "string"
         }
       },
       "required": [
