@@ -217,14 +217,28 @@ const currentYear = new Date().getFullYear();
         <p>
           &copy; {currentYear} <span class="text-pink-400 font-medium">{t.company}</span>. {t.copyright}
         </p>
-        <p class="text-xs text-slate-600">
-          Geliştirici: <a
-            href="https://www.instagram.com/talyadrone"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-pink-400 hover:text-pink-300 transition-colors"
-          >TalyaDrone</a>
-        </p>
+        
+        <!-- Developer Credit with SEO -->
+        <div
+          class="developer-credit mt-4"
+          itemscope
+          itemtype="https://schema.org/Organization"
+        >
+          <p class="text-xs text-slate-600">
+            Geliştirici:
+            <a
+              href="https://dosemealtiyazilim.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              itemprop="url"
+              title="Döşemealtı Yazılım - Web Yaz��lım Geliştirme Hizmetleri"
+              aria-label="Döşemealtı Yazılım web sitesine git"
+              class="text-pink-400 hover:text-pink-300 transition-colors hover:underline"
+            >
+              <span itemprop="name">Döşemealtı Yazılım</span>
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
